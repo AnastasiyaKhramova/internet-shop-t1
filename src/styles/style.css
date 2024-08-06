@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'Jost';
+    src: url('/src/assets/fonts/Jost-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400 600 700;
+    font-display: swap;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Jost', sans-serif;
+}
