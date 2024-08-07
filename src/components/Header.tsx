@@ -1,17 +1,20 @@
-import {Link} from 'react-router-dom'
+import {Link, useLocation} from 'react-router-dom';
+import { useEffect } from 'react';
+import cartImage from '../assets/img/cart.png';
 
 const Header = () => {
+    const location
     return (
         <>
             <header className='container'>
-                <div className='second-container'>
-                    <div><Link to="/">Goods4you</Link></div>
-                    <div>
-                        <a href="">Catalog</a>
-                        <a href="">FAQ</a>
-                        <div>
+                <div className='second-container headding'>
+                    <div><Link className='headding-logo' to="/">Goods4you</Link></div>
+                    <div className='menu'>
+                        <a href="#catalog"><Link to="/">Catalog</Link></a>
+                        <a href="#faq"><Link to="/">FAQ</Link></a>
+                        <div className='menu__cart'>
                             <Link to='/cart'>Cart</Link>
-                            <img src="../assets/img/cart.jpg" alt="cart" />
+                            <img src={cartImage} alt="cart" />
                         </div>
                         <a href="#">Johnson Smith</a>
                     </div>

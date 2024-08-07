@@ -4,6 +4,9 @@ import Home from './pages/Home.tsx'
 import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import ErrorPage from './pages/ErrorPage.tsx'
+import './styles/style.css'
+import './styles/variables.css'
+import Product from './pages/Product.tsx'
 
 
 const router = createBrowserRouter([
@@ -14,6 +17,10 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <ErrorPage />,
+  },
+  {
+    path: "/product/:id",
+    element: <Product />,
   },
 ]);
 
