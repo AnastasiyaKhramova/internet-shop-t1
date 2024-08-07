@@ -1,13 +1,15 @@
 import React from 'react';
 
 interface ButtonProps {
-  btnName: string;
+  btnName?: string;
+  imgSrc?: string;
+  altText?: string;
   width?: string;
   height?: string;
   href?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;}
 
-const Button: React.FC<ButtonProps> = ({ btnName, href, onClick, width = '177px', height = '62px'}) => {
+const Button: React.FC<ButtonProps> = ({ btnName,imgSrc, altText, href, onClick, width = '177px', height = '62px'}) => {
   const buttonStyle = {
     width,
     height,
@@ -22,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({ btnName, href, onClick, width = '177px'
       </a>
     ) : (
       <button onClick={onClick} className="main__btn" style={buttonStyle}>
-        {btnName}
+         {imgSrc ? <img src={imgSrc} alt={altText} /> : btnName}
       </button>
   ));
 };

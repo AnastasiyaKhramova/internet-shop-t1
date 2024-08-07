@@ -3,7 +3,7 @@ import star from '../assets/img/star.jpg'
 import prices from '../assets/img/prices.jpg'
 import Button from './Button'
 function ProductItems() {
-  let productItems = [
+  const productItems = [
     {
       id: 1,
       img: item
@@ -36,7 +36,7 @@ function ProductItems() {
           <img className='big-img' src={item} alt="product" />
           <div className='slider'>
             {productItems.map(item => (
-              <img className='small-img' src={item.img} alt={`product ${item.id}`} />
+              <img className='small-img' key={item.id} src={item.img} alt={`product ${item.id}`} />
             ))}
           </div>
         </div>

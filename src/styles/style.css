@@ -31,6 +31,8 @@ body {
     align-items: center;
 }
 
+/* Header */
+
 .headding {
     height: 90px;
 }
@@ -40,6 +42,8 @@ body {
     font-size: 30px;
     font-weight: 700;
 }
+
+/* Menu */
 
 .menu {
     display: flex;
@@ -58,6 +62,8 @@ body {
     display: flex;
     gap: 6px;
 }
+
+/* Main */
 
 .main {
     border-top: 1px solid var(--text-color);
@@ -107,6 +113,8 @@ body {
     line-height: 3.5vw;
 }
 
+/* Catalog */
+
 .catalog {
     display: flex;
     flex-direction: column;
@@ -139,6 +147,7 @@ body {
     column-gap: 35px;
 }
 
+/* Card  */
 
 .card {
     width: 370px;
@@ -217,6 +226,8 @@ body {
     border-radius: 4px;
 }
 
+/* FAQ */
+
 .faq__title {
     font-size: 36px;
     line-height: 56px;
@@ -265,10 +276,14 @@ body {
     transform: rotate(45deg);
 }
 
+/* Footer */
+
 .footer {
     background-color: rgba(68, 75, 88);
     height: 90px;
 }
+
+/* Product */
 
 .big-img {
     width: 520px;
@@ -372,4 +387,11 @@ body {
 .product__desc_persent span {
     font-weight: 600;
     line-height: 24px;
+}
+
+/* Cart */
+
+.cart {
+    display: flex;
+    flex-direction: column;
 }

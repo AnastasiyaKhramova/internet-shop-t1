@@ -7,8 +7,8 @@ const Footer = () => {
         <div className='second-container footer'>
           <div ><Link className='headding-logo' to="/">Goods4you</Link></div>
           <div className='menu'>
-            <a href="#catalog">Catalog</a>
-            <a href="#faq">FAQ</a>
+          <Link to="/#catalog">Catalog</Link>
+          <Link to="/#faq">FAQ</Link>
           </div>
         </div>
       </header>
