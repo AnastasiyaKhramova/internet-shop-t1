@@ -99,7 +99,7 @@ function Catalog() {
                                     <Link to={`/product/${product.id}`}><h4>{product.name}</h4></Link>
                                         <p>${product.price}</p>
                                     </div>
-                                    <button className="btn"><img src={cart} alt="basket" /></button>
+                                    <Button imgSrc={cart} altText="basket" width='50px' height='50px'/>
                                 </div>
                             </div>
                         ))}

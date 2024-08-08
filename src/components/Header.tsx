@@ -23,6 +23,7 @@ const Header = () => {
                         <div className='menu__cart'>
                             <Link to='/cart'>Cart</Link>
                             <img src={cartImage} alt="cart" />
+                            <div className='menu__cart_count'>1</div>
                         </div>
                         <a href="#">Johnson Smith</a>
                     </div>

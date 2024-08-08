@@ -36,27 +36,49 @@ function MyCart() {
                 <div className="cart__items">
                     <div className="cart__items_count">
                         {cartItems.map(cartItem => (
-                            <>
-                                <img key={cartItem.id} src={cartItem.img} alt={`cartItem ${cartItem.id}`} />
-                                <div>
-                                    <h3>{cartItem.title}</h3>
-                                    <p>${cartItem.price}</p>
+                            <div className="cart-item" key={cartItem.id}>
+                                <div className="cart-item_buy">
+                                    <img className="cart-item_img" src={cartItem.img} alt={`cartItem ${cartItem.id}`} />
+                                    <div className="cart-item_price">
+                                        <h3>{cartItem.title}</h3>
+                                        <p>${cartItem.price}</p>
+                                    </div>
                                 </div>
-                                <Button btnName='-'></Button>
-                                <p>{cartItem.count}</p>
-                                <Button btnName='+'></Button>
-                                <p>{cartItem.delete}</p>
-
-                            </>
+                                <div className="cart-item_btn">
+                                    <Button btnName='-' width="50px" height="50px"></Button>
+                                    <p>{cartItem.count}</p>
+                                    <Button btnName='+' width="50px" height="50px"></Button>
+                                </div>
+                                <p className="cart-item_del">{cartItem.delete}</p>
+                            </div>
                         ))}
-                        <img src={cartItem} alt='cartItem' />
-                        <div>
-                            <h3>Essence Mascara Lash Princess</h3>
-                            <p>$ 110</p>
+                        <div className="cart-item">
+                            <div className="cart-item_buy">
+                                <img className="cart-item_img" src={cartItem} alt='cartItem' />
+                                <div className="cart-item_price">
+                                    <h3>Essence Mascara Lash Princess</h3>
+                                    <p>$ 110</p>
+                                </div>
+                            </div>
+                            <div className="cart-item_btn">
+                                <Button imgSrc={cart} width="50px" height="50px" altText="cart"></Button>
+                            </div>
                         </div>
-                        <Button imgSrc={cart} altText="cart"></Button>
                     </div>
-                    <div className="cart__items_costs"></div>
+                    <div>
+                        <div className="cart__items_costs">
+                            <h4 className="cart__items_total">Total count</h4>
+                            <p className="cart__items_total-count">3 items</p>
+                        </div>
+                        <div className="cart__items_costs">
+                        <h3 className="cart__items_out-discont">Price without discount</h3>
+                        <p className="cart__items_out-discont-price">$700</p>
+                        </div>
+                        <div className="cart__items_costs">
+                            <h2 className="cart__items_total-title">Total price</h2>
+                            <p className="cart__items_total-price">$590</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </>
