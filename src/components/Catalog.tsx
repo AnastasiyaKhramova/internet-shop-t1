@@ -84,7 +84,7 @@ function Catalog() {
             <section id='catalog' className='second-container'>
                 <div className='catalog'>
                     <h2 className='catalog__title'>Catalog</h2>
-                    <input className='catalog__find' type="text" placeholder='Search by title' />
+                    <input className='catalog__find' type="text" placeholder='Search by title' aria-label="Find product"/>
                     <div className='catalog__card'>
                         {products.map(product => (
                             <div className="card" key={product.id}>
@@ -99,7 +99,7 @@ function Catalog() {
                                     <Link to={`/product/${product.id}`}><h4>{product.name}</h4></Link>
                                         <p>${product.price}</p>
                                     </div>
-                                    <Button imgSrc={cart} altText="basket" width='50px' height='50px'/>
+                                    <Button imgSrc={cart} altText="basket" width='50px' height='50px'  aria-label={`Add ${product.name} to cart`}/>
                                 </div>
                             </div>
                         ))}

@@ -18,13 +18,13 @@ const Header = () => {
                 <div className='second-container headding'>
                     <div><Link className='headding-logo' to="/">Goods4you</Link></div>
                     <div className='menu'>
-                        <Link to="/#catalog">Catalog</Link>
-                        <Link to="/#faq">FAQ</Link>
-                        <div className='menu__cart'>
-                            <Link to='/cart'>Cart</Link>
+                        <Link to="/#catalog" aria-label="Catalog">Catalog</Link>
+                        <Link to="/#faq" aria-label="FAQ">FAQ</Link>
+                        <nav className='menu__cart' aria-label="Navigation">
+                            <Link to='/cart' aria-label="Cart">Cart</Link>
                             <img src={cartImage} alt="cart" />
                             <div className='menu__cart_count'>1</div>
-                        </div>
+                        </nav>
                         <a href="#">Johnson Smith</a>
                     </div>
                 </div>
