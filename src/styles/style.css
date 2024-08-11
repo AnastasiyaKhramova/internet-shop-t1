@@ -448,6 +448,9 @@ body {
     border-radius: 4px;
     margin-bottom: 92px;
     padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .cart-item {
