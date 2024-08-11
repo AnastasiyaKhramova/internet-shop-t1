@@ -86,11 +86,10 @@ body {
 
 .main {
     border-top: 1px solid var(--text-color);
-    height: calc(var(--second-container)/2);
+    height: 500px;
     display: flex;
     color: var(--text-color);
     flex-direction: column;
-    justify-content: center;
     align-items: flex-start;
     gap: 30px;
 }
@@ -100,7 +99,8 @@ body {
     position: absolute;
     font-weight: 700;
     font-size: 200px;
-    line-height: 300px;
+    line-height: 543px;
+    left: 176px;
     color: rgba(255, 255, 255, 0.12);
     pointer-events: none;
 }
@@ -110,7 +110,7 @@ body {
     height: 100px;
     font-size: 36px;
     font-weight: 400;
-
+    margin-top: 115px;
 }
 
 .main__subtitle {
@@ -125,7 +125,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 48px;
+    margin-bottom: 57px;
 }
 
 .main__btn {
