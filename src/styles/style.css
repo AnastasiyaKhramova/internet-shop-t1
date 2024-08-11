@@ -443,9 +443,11 @@ body {
 
 .cart__items_count {
     width: 776px;
+    min-height: 566px;
     border: 1px solid rgba(196, 196, 196);
     border-radius: 4px;
     margin-bottom: 92px;
+    padding: 20px 40px;
 }
 
 .cart-item {
@@ -456,6 +458,9 @@ body {
     padding: 12px;
 }
 
+.cart-item:hover {
+    background-color: rgba(246, 246, 246);
+}
 .cart-item_img {
     width: 100px;
     height: 100px;
