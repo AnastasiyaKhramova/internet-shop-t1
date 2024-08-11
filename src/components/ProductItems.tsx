@@ -41,10 +41,12 @@ function ProductItems() {
           </div>
         </div>
         <div className='product__desc'>
-          <h1 className='product__desc_title'>Essence Mascara Lash Princess</h1>
-          <div className='product__desc_star'>
-            <img src={star} alt="star" />
-            <p className='product__desc_category'>electronics, selfie accessories</p>
+          <div>
+            <h1 className='product__desc_title'>Essence Mascara Lash Princess</h1>
+            <div className='product__desc_star'>
+              <img src={star} alt="star" />
+              <p className='product__desc_category'>electronics, selfie accessories</p>
+            </div>
           </div>
           <h2 className='product__desc_subtitle'>In Stock - Only 5 left!</h2>
           <h3 className='product__desc_specification'>The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.</h3>
@@ -53,8 +55,10 @@ function ProductItems() {
             <p>Ships in 1 month</p>
           </div>
           <div className='product__desc_discount'>
-            <img src={prices} alt="prices" />
-            <h4 className='product__desc_persent'>Your discount: <span>14.5%</span></h4>
+            <div className='product__desc__disk'>
+              <img src={prices} alt="prices" />
+              <h4 className='product__desc_persent'>Your discount: <span>14.5%</span></h4>
+            </div>
             <Button btnName='Add to Cart' />
           </div>
         </div>
