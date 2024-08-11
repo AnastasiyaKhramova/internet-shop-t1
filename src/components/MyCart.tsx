@@ -1,5 +1,7 @@
 import cartItem from "../assets/img/productItem.jpg";
 import cart from '../assets/img/cart.png';
+import minus from '../assets/img/minus.png';
+import plus from '../assets/img/plus.png';
 import Button from "./Button";
 
 function MyCart() {
@@ -45,9 +47,9 @@ function MyCart() {
                                     </div>
                                 </div>
                                 <div className="cart-item_btn">
-                                    <Button btnName='-' width="50px" height="50px"></Button>
+                                    <Button imgSrc={minus} width="50px" height="50px"></Button>
                                     <p>{cartItem.count}</p>
-                                    <Button btnName='+' width="50px" height="50px"></Button>
+                                    <Button imgSrc={plus} width="50px" height="50px"></Button>
                                 </div>
                                 <p className="cart-item_del">{cartItem.delete}</p>
                             </div>
@@ -60,7 +62,7 @@ function MyCart() {
                                     <p>$ 110</p>
                                 </div>
                             </div>
-                            <div className="cart-item_btn">
+                            <div className="cart-item_btn cart-item_btn-buy">
                                 <Button imgSrc={cart} width="50px" height="50px" altText="cart"></Button>
                             </div>
                         </div>

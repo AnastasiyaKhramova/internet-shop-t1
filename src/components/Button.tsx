@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({ btnName,imgSrc, altText, href, onClick,
       </a>
     ) : (
       <button onClick={onClick} className="main__btn" style={buttonStyle}>
-         {imgSrc ? <img src={imgSrc} alt={altText} /> : btnName}
+         {imgSrc ? <img style={{maxWidth:'18px', maxHeight:'18px'}} src={imgSrc} alt={altText} /> : btnName}
       </button>
   ));
 };

@@ -55,7 +55,7 @@ function ProductItems() {
             <p>Ships in 1 month</p>
           </div>
           <div className='product__desc_discount'>
-            <div className='product__desc__disk'>
+            <div className='product__desc_disk'>
               <img src={prices} alt="prices" />
               <h4 className='product__desc_persent'>Your discount: <span>14.5%</span></h4>
             </div>
