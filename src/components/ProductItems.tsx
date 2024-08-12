@@ -56,10 +56,13 @@ function ProductItems() {
           </div>
           <div className='product__desc_discount'>
             <div className='product__desc_disk'>
-              <img src={prices} alt="prices" />
+              <div className='product__desc_price'>
+                <p className='product__desc_price-disc'>$7.17</p>
+                <p className='product__desc_price-nondisc'>$9.99</p>
+              </div>
               <h4 className='product__desc_persent'>Your discount: <span>14.5%</span></h4>
             </div>
-            <Button btnName='Add to Cart' />
+            <Button btnName='Add to cart' />
           </div>
         </div>
       </section>

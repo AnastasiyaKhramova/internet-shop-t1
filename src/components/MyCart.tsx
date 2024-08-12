@@ -27,7 +27,7 @@ function MyCart() {
             img: cartItem,
             title: 'Essence Mascara Lash Princess',
             price: 110,
-            count: '5 item',
+            count: '5 items',
             delete: 'Delete'
         },
     ]
@@ -59,7 +59,7 @@ function MyCart() {
                                 <img className="cart-item_img" src={cartItem} alt='cartItem' />
                                 <div className="cart-item_price">
                                     <h3>Essence Mascara Lash Princess</h3>
-                                    <p>$ 110</p>
+                                    <p>$110</p>
                                 </div>
                             </div>
                             <div className="cart-item_btn cart-item_btn-buy">
