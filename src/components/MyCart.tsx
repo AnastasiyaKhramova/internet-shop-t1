@@ -1,10 +1,13 @@
 import cartItem from "../assets/img/productItem.jpg";
 import cart from '../assets/img/cart.png';
-import minus from '../assets/img/minus.png';
-import plus from '../assets/img/plus.png';
 import Button from "./Button";
+import ProductInCart from "./ProductInCart";
+import useCart from "../hooks/useCart";
 
 function MyCart() {
+
+    const { cartCount, addToCart, removeFromCart } = useCart();
+    
     const cartItems = [
         {
             id: 1,
@@ -47,9 +50,9 @@ function MyCart() {
                                     </div>
                                 </div>
                                 <div className="cart-item_btn">
-                                    <Button imgSrc={minus} width="50px" height="50px"></Button>
-                                    <p>{cartItem.count}</p>
-                                    <Button imgSrc={plus} width="50px" height="50px"></Button>
+                                    <ProductInCart  quantity={isInCart} 
+                                            onAdd={()=> addToCart(product.id)} 
+                                            onRemove={()=> removeFromCart(product.id)}/>
                                 </div>
                                 <p className="cart-item_del">{cartItem.delete}</p>
                             </div>
