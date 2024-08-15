@@ -1,66 +1,70 @@
-import item from '../assets/img/productItem.jpg'
-import star from '../assets/img/star.jpg'
-import prices from '../assets/img/prices.jpg'
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useGetProductQuery } from '../api/productApi';
 import Button from './Button'
+import ErrorPage from '../pages/ErrorPage';
+
 function ProductItems() {
-  const productItems = [
-    {
-      id: 1,
-      img: item
-    },
-    {
-      id: 2,
-      img: item
-    },
-    {
-      id: 3,
-      img: item
-    },
-    {
-      id: 4,
-      img: item
-    },
-    {
-      id: 5,
-      img: item
-    },
-    {
-      id: 6,
-      img: item
-    },
-  ]
+  const { id } = useParams<{ id: string }>();
+  const { data: product, error, isLoading } = useGetProductQuery(id);
+  const [mainImage, setMainImage] = useState<string>('');
+
+  useEffect(() => {
+    if (product) {
+      document.title = product.title;
+      setMainImage(product.images[0]);
+    }
+  }, [product]);
+
+  if (isLoading) { return <div>Loading...</div>; }
+  if (error) return <div>Error loading product</div>;
+  if (!product) { return <ErrorPage />; }
+
+  const discountedPrice = product.price * (1 - product.discountPercentage / 100);
+  const ratingStars = Math.round(product.rating);
+
   return (
     <>
       <section className='second-container product'>
         <div>
-          <img className='big-img' src={item} alt="product" />
-          <div className='slider'>
-            {productItems.map(item => (
-              <img className='small-img' key={item.id} src={item.img} alt={`product ${item.id}`} />
-            ))}
-          </div>
+          <img className='big-img' src={mainImage} alt={product.title} />
+          {product.images.lenth > 1 && (
+            <div className='slider'>
+              {product.images.map((item: string, index: number) => (
+                <img className='small-img' key={index} src={item} alt={`product ${index}`} onClick={() => setMainImage(item)} />
+              ))}
+            </div>
+          )}
         </div>
         <div className='product__desc'>
           <div>
-            <h1 className='product__desc_title'>Essence Mascara Lash Princess</h1>
-            <div className='product__desc_star'>
-              <img src={star} alt="star" />
-              <p className='product__desc_category'>electronics, selfie accessories</p>
+            <h1 className='product__desc_title'>{product.title}</h1>
+            <div className='product__desc_raiting'>
+              <div className='product__desc_star'>
+                {[...Array(5)].map((_, index) => (
+                  <svg key={index} width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7.04894 0.92705C7.3483 0.00573921 8.6517 0.00573969 8.95106 0.92705L10.0206 4.21885C10.1545 4.63087 10.5385 4.90983 10.9717 4.90983H14.4329C15.4016 4.90983 15.8044 6.14945 15.0207 6.71885L12.2205 8.75329C11.87 9.00793 11.7234 9.4593 11.8572 9.87132L12.9268 13.1631C13.2261 14.0844 12.1717 14.8506 11.388 14.2812L8.58778 12.2467C8.2373 11.9921 7.7627 11.9921 7.41221 12.2467L4.61204 14.2812C3.82833 14.8506 2.77385 14.0844 3.0732 13.1631L4.14277 9.87132C4.27665 9.4593 4.12999 9.00793 3.7795 8.75329L0.979333 6.71885C0.195619 6.14945 0.598395 4.90983 1.56712 4.90983H5.02832C5.46154 4.90983 5.8455 4.63087 5.97937 4.21885L7.04894 0.92705Z" fill={index < ratingStars ? '#F14F4F' : '#D5D5D5'}/>
+                  </svg>
+                  
+                ))}
+              </div>
+              <p className='product__desc_category'>{product.tags.join(', ')}</p>
             </div>
           </div>
-          <h2 className='product__desc_subtitle'>In Stock - Only 5 left!</h2>
-          <h3 className='product__desc_specification'>The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.</h3>
+          <h2 className='product__desc_subtitle'>{product.stock > 0 ? `In Stock - Only ${product.stock} left!` : 'Out of Stock'}</h2>
+          <h3 className='product__desc_specification'>{product.description}</h3>
           <div className='product__desc_info' >
-            <p>1 month warranty</p>
-            <p>Ships in 1 month</p>
+            <p>{product.warrantyInformation}</p>
+            <p>{product.shippingInformation}</p>
           </div>
           <div className='product__desc_discount'>
             <div className='product__desc_disk'>
               <div className='product__desc_price'>
-                <p className='product__desc_price-disc'>$7.17</p>
-                <p className='product__desc_price-nondisc'>$9.99</p>
+                <p className='product__desc_price-disc'>${discountedPrice.toFixed(2)}</p>
+                <p className='product__desc_price-nondisc'>${product.price.toFixed(2)}</p>
               </div>
-              <h4 className='product__desc_persent'>Your discount: <span>14.5%</span></h4>
+              <h4 className='product__desc_persent'>Your discount: <span>{product.discountPercentage}%</span></h4>
             </div>
             <Button btnName='Add to cart' />
           </div>

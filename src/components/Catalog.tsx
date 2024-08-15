@@ -11,7 +11,7 @@ interface Product {
     id: number;
     title: string;
     price: number;
-    discountPercentage:number;
+    discountPercentage: number;
     thumbnail: string;
 }
 
@@ -72,17 +72,20 @@ const Catalog = () => {
                     <div>Error loading products</div>
                 ) : (
                     <div className='catalog__card'>
-                       {products.map(product => {
+                        {products.map(product => {
                             const discountedPrice = product.price * (1 - product.discountPercentage / 100);
                             const isInCart = cartCount[product.id] || 0;
                             return (
                                 <div className="card" key={product.id}>
-                                    <div className="img__card">
-                                        <img src={product.thumbnail} alt={`card ${product.id}`} />
-                                        <div className="card__hover">
-                                            <span>Show Details</span>
+                                    <Link to={`/product/${product.id}`}>
+                                        <div className="img__card">
+
+                                            <img src={product.thumbnail} alt={`card ${product.id}`} />
+                                            <div className="card__hover">
+                                                <span>Show Details</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                     <div className='card__desc'>
                                         <div className="text__Card">
                                             <Link to={`/product/${product.id}`}>
@@ -90,20 +93,20 @@ const Catalog = () => {
                                             </Link>
                                             <p>${discountedPrice.toFixed(2)}</p>
                                         </div>
-                                        
+
                                         {isInCart > 0 ? (
-                                            <ProductInCart 
-                                            quantity={isInCart} 
-                                            onAdd={()=> addToCart(product.id)} 
-                                            onRemove={()=> removeFromCart(product.id)}/>
-                                        ): <Button 
-                                        imgSrc={cart} 
-                                        altText="basket" 
-                                        width='50px' 
-                                        height='50px' 
-                                        aria-label={`Add ${product.title} to cart`} 
-                                        onClick={() => addToCart(product.id)}
-                                    />}
+                                            <ProductInCart
+                                                quantity={isInCart}
+                                                onAdd={() => addToCart(product.id)}
+                                                onRemove={() => removeFromCart(product.id)} />
+                                        ) : <Button
+                                            imgSrc={cart}
+                                            altText="basket"
+                                            width='50px'
+                                            height='50px'
+                                            aria-label={`Add ${product.title} to cart`}
+                                            onClick={() => addToCart(product.id)}
+                                        />}
                                     </div>
                                 </div>
                             );

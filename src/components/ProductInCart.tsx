@@ -14,7 +14,11 @@ const ProductInCart: React.FC<ProductInCartProps> = ({ quantity, onAdd, onRemove
         <>
             <div className="cart-item_btn">
                 <Button imgSrc={minus} width="50px" height="50px" onClick={onRemove} aria-label="Remove one item from cart"></Button>
-                <p>{quantity}</p>
+                {quantity === 1 ? (
+                    <p>{quantity} item</p>
+                ) : (
+                    <p>{quantity} items</p>
+                )}
                 <Button imgSrc={plus} width="50px" height="50px" onClick={onAdd} aria-label="Add one item to cart"></Button>
             </div>
 
