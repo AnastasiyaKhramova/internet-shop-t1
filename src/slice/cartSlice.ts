@@ -1,10 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store/store';
 
+export interface CartProduct {
+    id: number;
+    title: string;
+    price: number;
+    discountPercentage: number;
+    quantity: number;
+    thumbnail: string;
+}
+
 interface Cart {
     id: number;
+    totalProducts: number;
     totalQuantity: number;
-    products: Array<string>;
+    totalPrice: number;
+    totalDiscount: number;
+    products: CartProduct[];
 }
 
 export interface CartState {
