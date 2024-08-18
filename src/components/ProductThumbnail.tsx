@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface ProductThumbnailProps {
+export interface ProductThumbnailProps {
     src: string;
     alt: string;
 }
