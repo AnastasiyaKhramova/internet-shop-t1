@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import Button from './Button';
-import ProductInCart from './ProductInCart';
-import useCart from '../hooks/useCart';
-import cart from '../assets/img/cart.png';
-import { useSearchProductsQuery } from '../api/productApi';
 import debounce from 'debounce';
+import { useSearchProductsQuery } from '../api/productApi';
+import useCart from '../hooks/useCart';
+import ProductCard from '../components/ProductCard';
+import Button from '../components/Button';
 
-interface Product {
+export interface Product {
     id: number;
     title: string;
     price: number;
@@ -15,42 +13,41 @@ interface Product {
     thumbnail: string;
 }
 
-interface SearchProductsResponse {
-    products: Product[];
-    total: number;
+export interface CartProduct extends Product {
+    quantity: number;
 }
 
-const Catalog = () => {
+const Catalog: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [skip, setSkip] = useState<number>(0);
     const [products, setProducts] = useState<Product[]>([]);
     const limit = 12;
 
+    // Запрос на получение продуктов с учетом поиска
     const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
+
+    // Хук для управления корзиной
     const { cartCount, addToCart, removeFromCart } = useCart();
 
+    // Функция для обработки изменений в строке поиска
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
         setSearchTerm(search);
         setSkip(0);
         setProducts([]);
-
-        if (data && data.products) {
-            const filteredProducts = data.products.filter((product: Product) =>
-                product.title.toLowerCase().includes(search)
-            );
-            setProducts(filteredProducts);
-        }
     };
 
+    // Декорируем обработчик поиска функцией debounce
     const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 500), []);
 
+    // Функция для загрузки дополнительных продуктов при клике на "Show More"
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);
     };
 
+    // Обновление состояния продуктов при изменении данных из запроса
     useEffect(() => {
-        if (data) {
+        if (data && data.products) {
             setProducts(prevProducts => [...prevProducts, ...data.products]);
         }
     }, [data]);
@@ -73,42 +70,20 @@ const Catalog = () => {
                 ) : (
                     <div className='catalog__card'>
                         {products.map(product => {
-                            const discountedPrice = product.price * (1 - product.discountPercentage / 100);
-                            const isInCart = cartCount[product.id] || 0;
+                            const isInCart = cartCount[product.id] > 0;
+                            const cartProduct: CartProduct = {
+                                ...product,
+                                quantity: cartCount[product.id] || 0,
+                            };
+
                             return (
-                                <div className="card" key={product.id}>
-                                    <Link to={`/product/${product.id}`}>
-                                        <div className="img__card">
-
-                                            <img src={product.thumbnail} alt={`card ${product.id}`} />
-                                            <div className="card__hover">
-                                                <span>Show Details</span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                    <div className='card__desc'>
-                                        <div className="text__Card">
-                                            <Link to={`/product/${product.id}`}>
-                                                <h4>{product.title}</h4>
-                                            </Link>
-                                            <p>${discountedPrice.toFixed(2)}</p>
-                                        </div>
-
-                                        {isInCart > 0 ? (
-                                            <ProductInCart
-                                                quantity={isInCart}
-                                                onAdd={() => addToCart(product.id)}
-                                                onRemove={() => removeFromCart(product.id)} />
-                                        ) : <Button
-                                            imgSrc={cart}
-                                            altText="basket"
-                                            width='50px'
-                                            height='50px'
-                                            aria-label={`Add ${product.title} to cart`}
-                                            onClick={() => addToCart(product.id)}
-                                        />}
-                                    </div>
-                                </div>
+                                <ProductCard
+                                    key={product.id}
+                                    product={cartProduct}
+                                    isInCart={isInCart}
+                                    onAddToCart={() => addToCart(product.id)}
+                                    onRemoveFromCart={() => removeFromCart(product.id)}
+                                />
                             );
                         })}
                     </div>
@@ -122,4 +97,5 @@ const Catalog = () => {
         </section>
     );
 };
+
 export default Catalog;

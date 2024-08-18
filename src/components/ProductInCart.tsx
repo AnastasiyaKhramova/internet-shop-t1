@@ -2,7 +2,7 @@ import minus from '../assets/img/minus.png';
 import plus from '../assets/img/plus.png';
 import Button from './Button';
 
-interface ProductInCartProps {
+export interface ProductInCartProps {
     quantity: number;
     onAdd: () => void;
     onRemove: () => void;

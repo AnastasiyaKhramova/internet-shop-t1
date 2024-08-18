@@ -15,7 +15,7 @@ function ProductItems() {
 
   useEffect(() => {
     if (product) {
-      document.title = product.title;
+      document.title = `${product.title} | Goods4you`;
       setMainImage(product.images[0]);
     }
   }, [product]);

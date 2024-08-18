@@ -50,7 +50,24 @@ export const fetchCartByUser = createAsyncThunk(
 const cartSlice = createSlice({
     name: 'cart',
     initialState,
-    reducers: {},
+    reducers: {
+        addToCart: (state, action) => {
+            if (state.cart) {
+                const product = state.cart.products.find(p => p.id === action.payload);
+                if (product) {
+                    product.quantity++;
+                }
+            }
+        },
+        removeFromCart: (state, action) => {
+            if (state.cart) {
+                const product = state.cart.products.find(p => p.id === action.payload);
+                if (product && product.quantity > 0) {
+                    product.quantity--;
+                }
+            }
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchCartByUser.pending, (state) => {
@@ -67,6 +84,7 @@ const cartSlice = createSlice({
     },
 });
 
+export const { addToCart, removeFromCart } = cartSlice.actions;
 export const selectCart = (state: RootState) => state.cart.cart;
 export const selectCartStatus = (state: RootState) => state.cart.status;
 export const selectCartError = (state: RootState) => state.cart.error;
