@@ -47,9 +47,9 @@ function MyCart() {
                                     </div>
                                 </div>
                                 <div className="cart-item_btn">
-                                    <Button imgSrc={minus} width="50px" height="50px"></Button>
+                                    <Button imgSrc={minus} width="50px" height="50px" aria-lable = "Remove goods"></Button>
                                     <p>{cartItem.count}</p>
-                                    <Button imgSrc={plus} width="50px" height="50px"></Button>
+                                    <Button imgSrc={plus} width="50px" height="50px" aria-lable = "Add goods"></Button>
                                 </div>
                                 <p className="cart-item_del">{cartItem.delete}</p>
                             </div>
@@ -63,7 +63,7 @@ function MyCart() {
                                 </div>
                             </div>
                             <div className="cart-item_btn cart-item_btn-buy">
-                                <Button imgSrc={cart} width="50px" height="50px" altText="cart"></Button>
+                                <Button imgSrc={cart} width="50px" height="50px" altText="cart" aria-lable = {`Add to cart`}></Button>
                             </div>
                         </div>
                     </div>
