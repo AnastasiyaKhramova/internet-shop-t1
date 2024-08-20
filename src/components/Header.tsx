@@ -47,7 +47,7 @@ const Header = () => {
                                 <div className='menu__cart_count'>{cart.totalQuantity}</div>
                             )}
                         </nav>
-                        <a href="#">{userName}</a>
+                        <Link to="/login" aria-label='To login'>{userName}</Link>
                     </div>
                 </div>
             </header>

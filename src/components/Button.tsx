@@ -7,15 +7,13 @@ export interface ButtonProps {
   width?: string;
   height?: string;
   href?: string;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: () => void;
 }
 
 const Button: React.FC<ButtonProps> = ({ btnName, imgSrc, altText, href, onClick, width = '177px', height = '62px' }) => {
   const buttonStyle = {
     width,
     height,
-    href,
-    onClick,
   };
 
   return (

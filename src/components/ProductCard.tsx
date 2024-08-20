@@ -8,11 +8,11 @@ import { CartProduct } from '../slice/cartSlice';
 export interface ProductCardProps {
     product: CartProduct;
     isInCart: boolean;
-    onAddToCart: () => void;
-    onRemoveFromCart: () => void;
+    onAdd: () => void;
+    onRemove: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCart, onRemoveFromCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAdd, onRemove }) => {
     const discountedPrice = product.price * (1 - product.discountPercentage / 100);
 
     return (
@@ -36,8 +36,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCar
                 {isInCart ? (
                     <ProductInCart
                         quantity={product.quantity}
-                        onAdd={onAddToCart}
-                        onRemove={onRemoveFromCart} 
+                        onAdd={onAdd}
+                        onRemove={onRemove} 
                     />
                 ) : (
                     <Button
@@ -46,7 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCar
                         width='50px'
                         height='50px'
                         aria-label={`Add ${product.title} to cart`}
-                        onClick={onAddToCart}
+                        onClick={onAdd}
                     />
                 )}
             </div>

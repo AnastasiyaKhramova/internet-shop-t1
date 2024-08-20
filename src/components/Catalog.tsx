@@ -1,51 +1,41 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
-import useCart from '../hooks/useCart';
+import { useDispatch, useSelector } from 'react-redux';
+import { CartProduct, addToCart, removeFromCart, selectCartCount } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
-
-export interface Product {
-    id: number;
-    title: string;
-    price: number;
-    discountPercentage: number;
-    thumbnail: string;
-}
-
-export interface CartProduct extends Product {
-    quantity: number;
-}
 
 const Catalog: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [skip, setSkip] = useState<number>(0);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<CartProduct[]>([]);
     const limit = 12;
 
-    // Запрос на получение продуктов с учетом поиска
     const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
 
-    // Хук для управления корзиной
-    const { cartCount, addToCart, removeFromCart } = useCart();
+    const dispatch = useDispatch();
+    const cartCount = useSelector(selectCartCount); 
 
-    // Функция для обработки изменений в строке поиска
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
         setSearchTerm(search);
         setSkip(0);
         setProducts([]);
+        if (data && data.products) {
+            const filteredProducts = data.products.filter((product: CartProduct) =>
+                product.title.toLowerCase().includes(search)
+            );
+            setProducts(filteredProducts);
+        }
     };
 
-    // Декорируем обработчик поиска функцией debounce
-    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 500), []);
+    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
 
-    // Функция для загрузки дополнительных продуктов при клике на "Show More"
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);
     };
 
-    // Обновление состояния продуктов при изменении данных из запроса
     useEffect(() => {
         if (data && data.products) {
             setProducts(prevProducts => [...prevProducts, ...data.products]);
@@ -75,19 +65,19 @@ const Catalog: React.FC = () => {
                                 ...product,
                                 quantity: cartCount[product.id] || 0,
                             };
-
                             return (
                                 <ProductCard
                                     key={product.id}
                                     product={cartProduct}
                                     isInCart={isInCart}
-                                    onAddToCart={() => addToCart(product.id)}
-                                    onRemoveFromCart={() => removeFromCart(product.id)}
+                                    onAdd={() => dispatch(addToCart(product.id))}
+                                    onRemove={() => dispatch(removeFromCart(product.id))}
                                 />
                             );
                         })}
                     </div>
                 )}
+                
                 {data && products.length < data.total && (
                     <div className="button-container">
                         <Button btnName='Show more' onClick={handleShowMore} />

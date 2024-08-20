@@ -9,6 +9,7 @@ import Cart from './pages/Cart.tsx';
 import { store } from './store/store.ts'; 
 import './styles/style.css';
 import './styles/variables.css';
+import Login from './pages/Login.tsx';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/cart",
     element: <Cart />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
   },
 ]);
 

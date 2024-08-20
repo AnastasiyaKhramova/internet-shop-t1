@@ -165,9 +165,10 @@ body {
     height: 62px;
     padding: 20px;
     background-color: rgba(246, 246, 246);
-    color: rgba(178, 181, 187);
     color: var(--text-color-dark);
     border: none;
+    font-family: Jost;
+    font-size: 16px;
 }
 
 .catalog__find::placeholder {
@@ -196,7 +197,7 @@ body {
 
 .img__card img {
     width: 100%;
-    height: auto;
+    height: 300px;
     display: block;
     transition: opacity 0.3s ease;
     margin-bottom: 10px;
@@ -218,10 +219,6 @@ body {
     font-size: 26px;
     font-weight: 800;
     line-height: 37.57px;
-}
-
-.img__card:hover .card__hover {
-    opacity: 1;
 }
 
 .card__hover span {
@@ -261,6 +258,10 @@ body {
     margin-top: 6px;
 }
 
+.card:hover .card__hover {
+    opacity: 1;
+}
+
 /* FAQ */
 
 .faq__title {
@@ -289,8 +290,16 @@ body {
     line-height: 26px;
     border-top: 1px solid var(--text-color);
     border-bottom: 1px solid var(--text-color);
-    padding: 25px 0 20px;
+    padding: 25px 0;
+    overflow: hidden;
+    max-height: 77px;
+    transition: max-height 1s ease, padding 1s ease;
+}
 
+.faq__details[open] {
+    max-height: 152px;
+    padding: 25px 0;
+    transition: max-height 1s ease, padding 1s ease;
 }
 
 .faq__details summary {
@@ -300,6 +309,7 @@ body {
     list-style: none;
     display: flex;
     justify-content: space-between;
+    cursor: pointer;
 }
 
 .faq__details[open] summary {
@@ -309,7 +319,7 @@ body {
 .faq__icon {
     width: 25px;
     height: 25px;
-    transition: transform 0.3s ease;
+    transition: transform 1s ease;
 }
 
 .faq__details[open] .faq__icon {
@@ -530,6 +540,10 @@ body {
     color: var(--text-color-dark);
 }
 
+.cart-item_price h3:hover {
+    text-decoration: underline;
+}
+
 .cart-item_price p {
     font-size: 18px;
     color: var(--text-color-dark);
@@ -573,7 +587,7 @@ body {
     align-items: center;
 }
 
-.cart-item_buy--dimmed{
+.cart-item_buy--dimmed {
     opacity: 60%;
 }
 
@@ -643,6 +657,33 @@ body {
     font-weight: 600;
     line-height: 36px;
     color: #B2B5BB;
+}
+
+/* Login */
+
+.registration {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.registration__title {
+    margin-top: 140px;
+    margin-bottom: 48px;
+    font-size: 36px;
+    line-height: 56px;
+    color: var(--text-color-dark);
+}
+
+.registration__form {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: 426px;
+    border: 1px solid rgba(196, 196, 196);
+    padding: 60px;
+    gap: 60px;
+    margin-bottom: 230px;
 }
 
 /* Media */

@@ -17,7 +17,7 @@ function Faq() {
                             <summary>
                                 What payment methods do you accept?
                                 <img className="faq__icon" src={plus} aria-hidden="true" alt="plus" />
-                                </summary>After placing your order, you will receive a confirmation email containing your order number and a tracking link. You can also log in to your account on our website and go to the "My Orders" section to track your delivery status.
+                            </summary>After placing your order, you will receive a confirmation email containing your order number and a tracking link. You can also log in to your account on our website and go to the "My Orders" section to track your delivery status.
                         </details>
                         <details className="faq__details" aria-expanded="false">
                             <summary>

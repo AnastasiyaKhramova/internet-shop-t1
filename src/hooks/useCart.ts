@@ -4,10 +4,14 @@ const useCart = () => {
     const [cartCount, setCartCount] = useState<{ [key: number]: number }>({});
 
     const addToCart = useCallback((productId: number) => {
-        setCartCount(prevCartCount => ({
-            ...prevCartCount,
-            [productId]: (prevCartCount[productId] || 0) + 1
-        }));
+        setCartCount(prevCartCount => {
+            const updatedCount = {
+                ...prevCartCount,
+                [productId]: (prevCartCount[productId] || 0) + 1
+            };
+            console.log('Updated cartCount:', updatedCount); // Debug вывод
+            return updatedCount;
+        });
     }, []);
 
     const removeFromCart = useCallback((productId: number) => {
