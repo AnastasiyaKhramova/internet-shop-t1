@@ -679,7 +679,7 @@ body {
     display: flex;
     flex-direction: column;
     width: 600px;
-    height: 426px;
+    min-height: 426px;
     border: 1px solid rgba(196, 196, 196);
     padding: 60px;
     gap: 60px;

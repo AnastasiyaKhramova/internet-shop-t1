@@ -10,11 +10,12 @@ import { store } from './store/store.ts';
 import './styles/style.css';
 import './styles/variables.css';
 import Login from './pages/Login.tsx';
+import ProtectedRoute from './HOC/ProtectedRouter.tsx';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <ProtectedRoute element={<Home />} />,
   },
   {
     path: "*",
@@ -22,11 +23,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/product/:id",
-    element: <Product />,
+    element: <ProtectedRoute element={<Product />} />,
   },
   {
     path: "/cart",
-    element: <Cart />,
+    element: <ProtectedRoute element={<Cart />} />,
   },
   {
     path: "/login",

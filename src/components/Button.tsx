@@ -8,9 +8,10 @@ export interface ButtonProps {
   height?: string;
   href?: string;
   onClick?: () => void;
+  type?: string;
 }
 
-const Button: React.FC<ButtonProps> = ({ btnName, imgSrc, altText, href, onClick, width = '177px', height = '62px' }) => {
+const Button: React.FC<ButtonProps> = ({ btnName, imgSrc, altText, href, onClick, type, width = '177px', height = '62px' }) => {
   const buttonStyle = {
     width,
     height,
@@ -22,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({ btnName, imgSrc, altText, href, onClick
         {btnName}
       </a>
     ) : (
-      <button onClick={onClick} className="main__btn" style={buttonStyle}>
+      <button onClick={onClick} type="submit" className="main__btn" style={buttonStyle}>
         {imgSrc ? <img style={{ maxWidth: '18px', maxHeight: '18px' }} src={imgSrc} alt={altText} /> : btnName}
       </button>
     ));

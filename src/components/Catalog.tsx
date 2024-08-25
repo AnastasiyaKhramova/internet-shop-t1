@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
 import { useDispatch, useSelector } from 'react-redux';
-import { CartProduct, addToCart, removeFromCart, selectCartCount } from '../slice/cartSlice';
+import { CartProduct, addToCart, removeFromCart, updateQuantity, selectCart } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 
@@ -15,7 +15,12 @@ const Catalog: React.FC = () => {
     const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
 
     const dispatch = useDispatch();
-    const cartCount = useSelector(selectCartCount); 
+    const cart = useSelector(selectCart);
+
+    const getProductQuantityInCart = (productId: number) => {
+        const product = cart?.products.find(p => p.id === productId);
+        return product ? product.quantity : 0;
+    };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
@@ -30,7 +35,7 @@ const Catalog: React.FC = () => {
         }
     };
 
-    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
+    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), [data]);
 
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);
@@ -41,6 +46,18 @@ const Catalog: React.FC = () => {
             setProducts(prevProducts => [...prevProducts, ...data.products]);
         }
     }, [data]);
+
+    const handleAddToCart = (product: CartProduct) => {
+        dispatch(addToCart(product));
+    };
+
+    const handleRemoveFromCart = (productId: number) => {
+        dispatch(removeFromCart(productId));
+    };
+
+    const handleUpdateQuantity = (productId: number, quantity: number) => {
+        dispatch(updateQuantity({ id: productId, quantity }));
+    };
 
     return (
         <section id='catalog' className='second-container'>
@@ -60,24 +77,22 @@ const Catalog: React.FC = () => {
                 ) : (
                     <div className='catalog__card'>
                         {products.map(product => {
-                            const isInCart = cartCount[product.id] > 0;
-                            const cartProduct: CartProduct = {
-                                ...product,
-                                quantity: cartCount[product.id] || 0,
-                            };
+                            const quantityInCart = getProductQuantityInCart(product.id);
+                            const isInCart = quantityInCart > 0;
                             return (
                                 <ProductCard
                                     key={product.id}
-                                    product={cartProduct}
+                                    product={product}
                                     isInCart={isInCart}
-                                    onAdd={() => dispatch(addToCart(product.id))}
-                                    onRemove={() => dispatch(removeFromCart(product.id))}
+                                    onAdd={() => handleAddToCart(product)}
+                                    onRemove={() => handleRemoveFromCart(product.id)}
+                                    onUpdateQuantity={(quantity) => handleUpdateQuantity(product.id, quantity)}
                                 />
                             );
                         })}
                     </div>
                 )}
-                
+
                 {data && products.length < data.total && (
                     <div className="button-container">
                         <Button btnName='Show more' onClick={handleShowMore} />

@@ -3,22 +3,23 @@ import { useEffect } from 'react';
 import cartImage from '../assets/img/cart.png';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import { fetchCartByUser, selectCart, selectCartStatus, selectCartError } from '../slice/cartSlice';
+import useUser from '../hooks/useUser';
 
-const Header = () => {
+const Header: React.FC = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const userID = 6;
-    const userName = "Johnson Smith";
+
+    const { user, loading: userLoading } = useUser();
 
     const cart = useAppSelector(selectCart);
     const cartStatus = useAppSelector(selectCartStatus);
     const cartError = useAppSelector(selectCartError);
 
     useEffect(() => {
-        if (cartStatus === 'idle') {
-            dispatch(fetchCartByUser(userID));
+        if (user && cartStatus === 'idle') {
+            dispatch(fetchCartByUser(user.id));
         }
-    }, [dispatch, cartStatus, userID]);
+    }, [dispatch, cartStatus, user]);
 
     useEffect(() => {
         if (location.hash) {
@@ -29,7 +30,8 @@ const Header = () => {
         }
     }, [location]);
 
-    if (cartStatus === 'loading') return <div>Loading...</div>;
+    if (userLoading) return <div>Loading user data...</div>;
+    if (cartStatus === 'loading') return <div>Loading cart...</div>;
     if (cartStatus === 'failed') return <div>Error loading cart: {cartError}</div>;
 
     return (
@@ -47,12 +49,12 @@ const Header = () => {
                                 <div className='menu__cart_count'>{cart.totalQuantity}</div>
                             )}
                         </nav>
-                        <Link to="/login" aria-label='To login'>{userName}</Link>
+                        <Link to="/login" aria-label='To login'>{user ? `${user.firstName} ${user.lastName}` : 'Login'}</Link>
                     </div>
                 </div>
             </header>
         </>
-    )
-}
+    );
+};
 
 export default Header;
