@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const SingIn: React.FC = () => {
-  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,24 +27,28 @@ const SingIn: React.FC = () => {
       <section className="second-container registration">
         <h1 className="registration__title">Sign in</h1>
         <form className="registration__form" onSubmit={handleSignIn}>
-          <input className="catalog__find"
+          <input className="catalog__find registration__input"
             type="text"
             placeholder="Login"
             aria-label="Input Login"
             onChange={(e) => setUsername(e.target.value)}
             required />
-          <input className="catalog__find"
-            type="text"
+          <input className="catalog__find registration__input"
+            type="password"
             placeholder="Password"
             aria-label="Input Password"
             onChange={(e) => setPassword(e.target.value)}
             required />
           {error && <div className="error-message">{error}</div>}
-          <Button
-            btnName="Sign in"
-            aria-lable="Sign in"
-            type="submit"
-          />
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <Button
+              btnName="Sign in"
+              aria-label="Sign in"
+              type="submit"
+            />
+          )}
         </form>
 
       </section>

@@ -1,10 +1,10 @@
 import Header from "../components/Header"
-import SingIn from "../components/SingIn"
+import SingIn from "../components/SignIn"
 
 function Login() {
     return (
         <div>
-            <Header />
+            <Header isHidden = {true}/>
             <SingIn />
         </div>
     )

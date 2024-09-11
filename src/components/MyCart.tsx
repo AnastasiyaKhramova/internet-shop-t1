@@ -1,28 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store/store';
-import { fetchCartByUser, selectCart, selectCartStatus, selectCartError, updateCart } from '../slice/cartSlice';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../store/store';
+import { updateCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
 import { getToken } from '../utils/auth'; 
-import useUser from '../hooks/useUser';
+import { useCartContext } from '../contexts/CartContext';
 
 const MyCart: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
-    const cart = useSelector((state: RootState) => state.cart.cart);
-    const cartStatus = useSelector(selectCartStatus);
-    const cartError = useSelector(selectCartError);
+    const { cart, cartStatus, cartError, reloadCart } = useCartContext();
     const [isUpdating, setIsUpdating] = useState(false);
     const token = getToken();
     const cartId = localStorage.getItem('cartId') || '';
-    const { user, loading } = useUser();
-
-    useEffect(() => {
-        if (user?.id) {
-            dispatch(fetchCartByUser(user.id));
-        }
-    }, [dispatch, user]);
 
     const handleAddToCart = async (productId: number) => {
         if (isUpdating || !token || !cartId) return;
@@ -40,9 +31,7 @@ const MyCart: React.FC = () => {
                 }
             })).unwrap();
 
-            if (user?.id) {
-                dispatch(fetchCartByUser(user.id)); 
-            }
+            reloadCart(); 
         } catch (error) {
             console.error('Failed to add product to cart', error);
         } finally {
@@ -71,9 +60,7 @@ const MyCart: React.FC = () => {
                     }
                 })).unwrap();
 
-                if (user?.id) {
-                    dispatch(fetchCartByUser(user.id)); 
-                }
+                reloadCart(); 
             }
         } catch (error) {
             console.error('Failed to remove product from cart', error);
@@ -97,7 +84,7 @@ const MyCart: React.FC = () => {
 
     const totalPriceWithDiscount = (totalPriceWithoutDiscount - totalDiscount);
 
-    if (loading) {
+    if (cartStatus === 'loading') {
         return <div>Loading...</div>;
     }
 

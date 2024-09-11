@@ -5,7 +5,16 @@ const useCart = () => {
   const [cartCount, setCartCount] = useState<{ [key: number]: number }>({});
   const token = localStorage.getItem('token');
 
+  const updateCartInStorage = (updatedCartCount: { [key: number]: number }) => {
+    localStorage.setItem('cartCount', JSON.stringify(updatedCartCount));
+  };
+
   useEffect(() => {
+    const storedCartCount = localStorage.getItem('cartCount');
+    if (storedCartCount) {
+        setCartCount(JSON.parse(storedCartCount));
+    }
+
     const storedCartId = localStorage.getItem('cartId');
     if (storedCartId) {
       setCartId(storedCartId);
@@ -54,6 +63,7 @@ const useCart = () => {
           countMap[product.id] = product.quantity;
         });
         setCartCount(countMap);
+        updateCartInStorage(countMap); 
       } else {
         console.error('Failed to fetch cart');
       }
@@ -81,6 +91,7 @@ const useCart = () => {
           products.forEach(product => {
             updatedCount[product.id] = product.quantity;
           });
+          updateCartInStorage(updatedCount);
           return updatedCount;
         });
       } else {
@@ -101,6 +112,7 @@ const useCart = () => {
         id: Number(id),
         quantity: updatedCount[Number(id)]
       })));
+      updateCartInStorage(updatedCount);
       return updatedCount;
     });
   }, [updateCart]);
@@ -117,6 +129,7 @@ const useCart = () => {
         id: Number(id),
         quantity: newCartCount[Number(id)]
       })));
+      updateCartInStorage(newCartCount);
       return newCartCount;
     });
   }, [updateCart]);

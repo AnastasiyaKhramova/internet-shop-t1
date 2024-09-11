@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import ProductInCart from './ProductInCart';
 import Button from '../components/Button';
 import basket from '../assets/img/cart.png';
 import { CartProduct } from '../slice/cartSlice';
+import useCart from '../hooks/useCart';
 
 export interface ProductCardProps {
     product: CartProduct;
@@ -13,44 +14,8 @@ export interface ProductCardProps {
     onUpdateQuantity: (quantity: number) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onRemove, onUpdateQuantity }) => {
-    const [cartCount, setCartCount] = useState<{ [key: number]: number }>({});
-
-    useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            setCartCount(JSON.parse(savedCart));
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cartCount));
-    }, [cartCount]);
-
-    const handleAddToCart = () => {
-        setCartCount(prevCart => {
-            const newCount = { ...prevCart, [product.id]: (prevCart[product.id] || 0) + 1 };
-            onUpdateQuantity(newCount[product.id]);
-            return newCount;
-        });
-        onAdd();
-    };
-
-    const handleRemoveFromCart = () => {
-        setCartCount(prevCart => {
-            const newQuantity = (prevCart[product.id] || 0) - 1;
-            if (newQuantity <= 0) {
-                const { [product.id]: _, ...rest } = prevCart;
-                onUpdateQuantity(0);
-                return rest;
-            }
-            const newCount = { ...prevCart, [product.id]: newQuantity };
-            onUpdateQuantity(newQuantity);
-            return newCount;
-        });
-        onRemove();
-    };
-
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+    const { cartCount, addToCart, removeFromCart } = useCart();
     const discountedPrice = product.price * (1 - product.discountPercentage / 100);
     const quantityInCart = cartCount[product.id] || 0;
 
@@ -75,8 +40,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onRemove, onU
                 {quantityInCart > 0 ? (
                     <ProductInCart
                         quantity={quantityInCart}
-                        onAdd={handleAddToCart}
-                        onRemove={handleRemoveFromCart}
+                        onAdd={() => addToCart(product.id)}
+                        onRemove={() => removeFromCart(product.id)}
                     />
                 ) : (
                     <Button
@@ -85,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd, onRemove, onU
                         width='50px'
                         height='50px'
                         aria-label={`Add ${product.title} to cart`}
-                        onClick={handleAddToCart}
+                        onClick={() => addToCart(product.id)}
                     />
                 )}
             </div>

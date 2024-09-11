@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../store/store';
-import { setUser } from '../slice/userSlice';
 import { getToken, setToken, removeToken } from '../utils/auth';
 import { fetchUserByToken } from '../api/authApi';
 import { fetchCartByUser } from '../slice/cartSlice';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../store/store';
+import { setUser } from '../slice/userSlice';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
 
     useEffect(() => {
         const token = getToken();
@@ -25,7 +23,6 @@ export const useAuth = () => {
                 .catch(() => {
                     removeToken();
                     setIsAuthenticated(false);
-                    navigate('/login');
                 })
                 .finally(() => setLoading(false));
         } else {
@@ -46,7 +43,6 @@ export const useAuth = () => {
             }
 
             const data = await response.json();
-            console.log('Login response data:', data);
 
             if (!data || !data.token || !data.id) {
                 throw new Error('Invalid response data');
@@ -56,9 +52,6 @@ export const useAuth = () => {
             dispatch(setUser(data));
             setIsAuthenticated(true);
             dispatch(fetchCartByUser(data.id));
-            console.log('Token in localStorage:', localStorage.getItem('token'));
-            navigate('/'); 
-
         } catch (error) {
             console.error('Login error', error);
             throw error;
@@ -69,7 +62,6 @@ export const useAuth = () => {
         removeToken();
         dispatch(setUser(null));
         setIsAuthenticated(false);
-        navigate('/login');;
     };
 
     return { login, logout, loading, isAuthenticated };

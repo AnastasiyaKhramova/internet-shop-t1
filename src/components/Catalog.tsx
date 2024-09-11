@@ -10,12 +10,37 @@ const Catalog: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [skip, setSkip] = useState<number>(0);
     const [products, setProducts] = useState<CartProduct[]>([]);
+    const [totalProducts, setTotalProducts] = useState<number>(0);
+    const [error, setError] = useState<string | null>(null);
     const limit = 12;
 
-    const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
+    const createQueryParams = (params: Record<string, string | number | undefined>) => {
+        const searchParams = new URLSearchParams();
+
+        Object.keys(params).forEach(key => {
+            const value = params[key];
+            if (value !== undefined) {
+                searchParams.append(key, String(value));
+            }
+        });
+
+        return searchParams.toString();
+    };
+
+    const queryParamsString = createQueryParams({ q: searchTerm, limit, skip });
+
+    const queryParams = Object.fromEntries(new URLSearchParams(queryParamsString));
+
+    const { data, error: queryError, isLoading } = useSearchProductsQuery(queryParams);
 
     const dispatch = useDispatch();
     const cart = useSelector(selectCart);
+
+    useEffect(() => {
+        if (data && data.total) {
+            setTotalProducts(data.total);
+        }
+    }, [data]);
 
     const getProductQuantityInCart = (productId: number) => {
         const product = cart?.products.find(p => p.id === productId);
@@ -42,10 +67,13 @@ const Catalog: React.FC = () => {
     };
 
     useEffect(() => {
-        if (data && data.products) {
+        if (queryError) {
+            setError('Failed to load products. Please try again later.');
+        } else if (data && data.products) {
+            setError(null);
             setProducts(prevProducts => [...prevProducts, ...data.products]);
         }
-    }, [data]);
+    }, [data, queryError]);
 
     const handleAddToCart = (product: CartProduct) => {
         dispatch(addToCart(product));
@@ -56,8 +84,13 @@ const Catalog: React.FC = () => {
     };
 
     const handleUpdateQuantity = (productId: number, quantity: number) => {
-        dispatch(updateQuantity({ id: productId, quantity }));
+        if (quantity > 0) {
+            dispatch(updateQuantity({ id: productId, quantity }));
+        } else {
+            handleRemoveFromCart(productId); 
+        }
     };
+
 
     return (
         <section id='catalog' className='second-container'>
@@ -93,7 +126,7 @@ const Catalog: React.FC = () => {
                     </div>
                 )}
 
-                {data && products.length < data.total && (
+                {data && products.length < totalProducts && (
                     <div className="button-container">
                         <Button btnName='Show more' onClick={handleShowMore} />
                     </div>
