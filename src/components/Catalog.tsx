@@ -60,7 +60,7 @@ const Catalog: React.FC = () => {
         }
     };
 
-    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), [data]);
+    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
 
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);

@@ -1,39 +1,27 @@
 import { Cart } from '../slice/cartSlice'; 
 
-export const getCartFromLocalStorage = () => {
-    const cartData = localStorage.getItem('cart');
-    try {
-        const parsedCart = JSON.parse(cartData || '{}');
-        if (
-            typeof parsedCart === 'object' &&
-            parsedCart !== null &&
-            Array.isArray(parsedCart.products)
-        ) {
-            return parsedCart.products;
-        }
-        return [];
-    } catch (e) {
-        console.error('Error parsing cart data from localStorage:', e);
-        return [];
-    }
-};
-
 export const loadCartFromLocalStorage = (): Cart | null => {
     try {
         const serializedCart = localStorage.getItem('cart');
-        return serializedCart ? JSON.parse(serializedCart) : null;
+        if (!serializedCart) return null;
+
+        const cart = JSON.parse(serializedCart);
+
+        if (typeof cart === 'object' && cart !== null && Array.isArray(cart.products)) {
+            return cart;
+        }
+        return null;
     } catch (error) {
-        console.error("Could not load cart from localStorage", error);
+        console.error("Error loading cart from localStorage:", error);
         return null;
     }
 };
 
-export const saveCartToLocalStorage = (cart: Cart | null) => {
+export const saveCartToLocalStorage = (cart: Cart | null): void => {
     try {
         const serializedCart = JSON.stringify(cart);
         localStorage.setItem('cart', serializedCart);
     } catch (error) {
-        console.error("Could not save cart to localStorage", error);
+        console.error("Error saving cart to localStorage:", error);
     }
 };
-

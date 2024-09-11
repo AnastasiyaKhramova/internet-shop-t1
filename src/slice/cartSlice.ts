@@ -32,6 +32,10 @@ const initialState: CartState = {
     error: null,
 };
 
+const updateCartStorage = (cart: Cart | null) => {
+    saveCartToLocalStorage(cart);
+};
+
 export const fetchCartByUser = createAsyncThunk(
     'cart/fetchCartByUser',
     async (userId: number, thunkAPI) => {
@@ -41,11 +45,7 @@ export const fetchCartByUser = createAsyncThunk(
                 throw new Error('Failed to fetch cart');
             }
             const data = await response.json();
-            if (data.carts.length > 0) {
-                return data.carts[0];
-            } else {
-                return null;
-            }
+            return data.carts.length > 0 ? data.carts[0] : null;
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -79,67 +79,76 @@ const cartSlice = createSlice({
     initialState,
     reducers: {
         addToCart: (state, action: PayloadAction<CartProduct>) => {
-            if (state.cart) {
-                const product = state.cart.products.find(p => p.id === action.payload.id);
-                if (product) {
-                    product.quantity++;
-                } else {
-                    state.cart.products.push(action.payload);
-                }
-                state.cart.totalQuantity++;
-                state.cart.totalPrice += action.payload.price * (1 - action.payload.discountPercentage / 100);
-            } else {
+            if (!state.cart) {
                 state.cart = {
                     id: Date.now(),
-                    totalProducts: 1,
-                    totalQuantity: 1,
-                    totalPrice: action.payload.price * (1 - action.payload.discountPercentage / 100),
-                    totalDiscount: action.payload.discountPercentage,
-                    products: [action.payload]
+                    totalProducts: 0,
+                    totalQuantity: 0,
+                    totalPrice: 0,
+                    totalDiscount: 0,
+                    products: []
                 };
             }
-            saveCartToLocalStorage(state.cart);  
+
+            const existingProduct = state.cart.products.find(p => p.id === action.payload.id);
+            if (existingProduct) {
+                existingProduct.quantity++;
+            } else {
+                state.cart.products.push(action.payload);
+            }
+
+            state.cart.totalQuantity++;
+            state.cart.totalPrice += action.payload.price * (1 - action.payload.discountPercentage / 100);
+            state.cart.totalProducts = state.cart.products.length;
+
+            updateCartStorage(state.cart);
         },
         removeFromCart: (state, action: PayloadAction<number>) => {
-            if (state.cart) {
-                const productIndex = state.cart.products.findIndex(p => p.id === action.payload);
-                if (productIndex >= 0) {
-                    const product = state.cart.products[productIndex];
-                    if (product.quantity > 1) {
-                        product.quantity--;
-                        state.cart.totalQuantity--;
-                        state.cart.totalPrice -= product.price * (1 - product.discountPercentage / 100);
-                    } else {
-                        state.cart.products.splice(productIndex, 1);
-                        state.cart.totalQuantity--;
-                        state.cart.totalPrice -= product.price * (1 - product.discountPercentage / 100);
-                    }
-                }
-                if (state.cart.products.length === 0) {
-                    state.cart = null;
-                }
-            }
-            saveCartToLocalStorage(state.cart);  
-        },
+            if (!state.cart) return;
 
-        updateQuantity: (state, action: PayloadAction<{ id: number, quantity: number }>) => {
-            if (state.cart && state.cart.products) { 
-                const product = state.cart.products.find(p => p.id === action.payload.id);
-                if (product) {
-                    const oldQuantity = product.quantity;
-                    product.quantity = action.payload.quantity;
-                    state.cart.totalQuantity += (action.payload.quantity - oldQuantity);
-                    state.cart.totalPrice += product.price * (1 - product.discountPercentage / 100) * (action.payload.quantity - oldQuantity);
-                }
+            const productIndex = state.cart.products.findIndex(p => p.id === action.payload);
+            if (productIndex === -1) return;
+
+            const product = state.cart.products[productIndex];
+
+            if (product.quantity > 1) {
+                product.quantity--;
+                state.cart.totalQuantity--;
+                state.cart.totalPrice -= product.price * (1 - product.discountPercentage / 100);
+            } else {
+                state.cart.products.splice(productIndex, 1);
+                state.cart.totalQuantity--;
+                state.cart.totalPrice -= product.price * (1 - product.discountPercentage / 100);
             }
-            saveCartToLocalStorage(state.cart);  
+
+            state.cart.totalProducts = state.cart.products.length;
+
+            if (state.cart.products.length === 0) {
+                state.cart = null;
+            }
+
+            updateCartStorage(state.cart);
         },
-        
+        updateQuantity: (state, action: PayloadAction<{ id: number, quantity: number }>) => {
+            if (!state.cart) return;
+
+            const product = state.cart.products.find(p => p.id === action.payload.id);
+            if (!product) return;
+
+            const quantityDifference = action.payload.quantity - product.quantity;
+
+            product.quantity = action.payload.quantity;
+            state.cart.totalQuantity += quantityDifference;
+            state.cart.totalPrice += product.price * (1 - product.discountPercentage / 100) * quantityDifference;
+
+            updateCartStorage(state.cart);
+        },
         clearCart: (state) => {
             state.cart = null;
-            saveCartToLocalStorage(null);  
+            updateCartStorage(null);
         },
     },
+    
     extraReducers: (builder) => {
         builder
             .addCase(fetchCartByUser.pending, (state) => {

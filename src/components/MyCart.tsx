@@ -5,7 +5,7 @@ import { updateCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
-import { getToken } from '../utils/auth'; 
+import { getToken } from '../utils/auth';
 import { useCartContext } from '../contexts/CartContext';
 
 const MyCart: React.FC = () => {
@@ -15,59 +15,83 @@ const MyCart: React.FC = () => {
     const token = getToken();
     const cartId = localStorage.getItem('cartId') || '';
 
-    const handleAddToCart = async (productId: number) => {
+    const handleCartUpdate = async (productId: number, quantity: number) => {
         if (isUpdating || !token || !cartId) return;
         setIsUpdating(true);
 
         try {
-            const product = cart?.products.find(p => p.id === productId);
-            const newQuantity = product ? product.quantity + 1 : 1;
+            const updatedProducts = quantity > 0
+                ? [{ id: productId, quantity }]
+                : cart?.products?.filter(p => p.id !== productId) ?? [];
+
             await dispatch(updateCart({
                 cartId,
-                products: [{ id: productId, quantity: newQuantity }],
+                products: updatedProducts,
                 merge: false,
-                headers: {
-                    Authorization: `Bearer ${token}`, 
-                }
+                headers: { Authorization: `Bearer ${token}` }
             })).unwrap();
 
-            reloadCart(); 
+            reloadCart();
         } catch (error) {
-            console.error('Failed to add product to cart', error);
+            console.error('Failed to update cart', error);
         } finally {
             setIsUpdating(false);
         }
     };
 
-    const handleRemoveFromCart = async (productId: number, removeAll = false) => {
-        if (isUpdating || !token || !cartId) return;
-        setIsUpdating(true);
+    // const handleAddToCart = async (productId: number) => {
+    //     if (isUpdating || !token || !cartId) return;
+    //     setIsUpdating(true);
 
-        try {
-            const product = cart?.products.find(p => p.id === productId);
-            if (product) {
-                const newQuantity = removeAll ? 0 : product.quantity - 1;
-                const updatedProducts = newQuantity > 0 
-                    ? [{ id: productId, quantity: newQuantity }] 
-                    : cart?.products?.filter(p => p.id !== productId) ?? [];
+    //     try {
+    //         const product = cart?.products.find(p => p.id === productId);
+    //         const newQuantity = product ? product.quantity + 1 : 1;
+    //         await dispatch(updateCart({
+    //             cartId,
+    //             products: [{ id: productId, quantity: newQuantity }],
+    //             merge: false,
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`, 
+    //             }
+    //         })).unwrap();
 
-                await dispatch(updateCart({
-                    cartId,
-                    products: updatedProducts,
-                    merge: false,
-                    headers: {
-                        Authorization: `Bearer ${token}`, 
-                    }
-                })).unwrap();
+    //         reloadCart(); 
+    //     } catch (error) {
+    //         console.error('Failed to add product to cart', error);
+    //     } finally {
+    //         setIsUpdating(false);
+    //     }
+    // };
 
-                reloadCart(); 
-            }
-        } catch (error) {
-            console.error('Failed to remove product from cart', error);
-        } finally {
-            setIsUpdating(false);
-        }
-    };
+    // const handleRemoveFromCart = async (productId: number, removeAll = false) => {
+    //     if (isUpdating || !token || !cartId) return;
+    //     setIsUpdating(true);
+
+    //     try {
+    //         const product = cart?.products.find(p => p.id === productId);
+    //         if (product) {
+    //             const newQuantity = removeAll ? 0 : product.quantity - 1;
+    //             const updatedProducts = newQuantity > 0 
+    //                 ? [{ id: productId, quantity: newQuantity }] 
+    //                 : cart?.products?.filter(p => p.id !== productId) ?? [];
+
+    //             await dispatch(updateCart({
+    //                 cartId,
+    //                 products: updatedProducts,
+    //                 merge: false,
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`, 
+    //                 }
+    //             })).unwrap();
+
+    //             reloadCart(); 
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to remove product from cart', error);
+    //     } finally {
+    //         setIsUpdating(false);
+    //     }
+    // };
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;
@@ -112,11 +136,11 @@ const MyCart: React.FC = () => {
                                         <div className="cart-item_btn">
                                             <ProductInCart
                                                 quantity={product.quantity}
-                                                onAdd={() => handleAddToCart(product.id)}
-                                                onRemove={() => handleRemoveFromCart(product.id)}
+                                                onAdd={() => handleCartUpdate(product.id, product.quantity + 1)}
+                                                onRemove={() => handleCartUpdate(product.id, product.quantity - 1)}
                                             />
                                         </div>
-                                        <button className="cart-item_del" onClick={() => handleRemoveFromCart(product.id, true)}>Delete</button>
+                                        <button className="cart-item_del" onClick={() => handleCartUpdate(product.id, 0)}>Delete</button>
                                     </>
                                 ) : (
                                     <Button
@@ -125,7 +149,7 @@ const MyCart: React.FC = () => {
                                         width='50px'
                                         height='50px'
                                         aria-label={`Add ${product.title} to cart`}
-                                        onClick={() => handleAddToCart(product.id)}
+                                        onClick={() => handleCartUpdate(product.id, product.quantity + 1)}
                                     />
                                 )}
                             </div>

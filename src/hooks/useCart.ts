@@ -6,11 +6,11 @@ const useCart = () => {
   const token = localStorage.getItem('token');
 
   const updateCartInStorage = (updatedCartCount: { [key: number]: number }) => {
-    localStorage.setItem('cartCount', JSON.stringify(updatedCartCount));
+    localStorage.setItem('cart', JSON.stringify(updatedCartCount));
   };
 
   useEffect(() => {
-    const storedCartCount = localStorage.getItem('cartCount');
+    const storedCartCount = localStorage.getItem('cart');
     if (storedCartCount) {
         setCartCount(JSON.parse(storedCartCount));
     }
@@ -86,7 +86,7 @@ const useCart = () => {
       });
 
       if (response.ok) {
-        setCartCount(prevCartCount => {
+        setCartCount(() => {
           const updatedCount: { [key: number]: number } = {};
           products.forEach(product => {
             updatedCount[product.id] = product.quantity;
