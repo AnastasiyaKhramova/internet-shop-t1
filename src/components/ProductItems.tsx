@@ -5,14 +5,15 @@ import useCart from '../hooks/useCart';
 import Button from './Button';
 import ProductInCart from './ProductInCart';
 import ErrorPage from '../pages/ErrorPage';
-import { loadCartFromLocalStorage, saveCartToLocalStorage } from '../utils/localstorage'; 
+import { loadCartFromLocalStorage } from '../utils/localstorage'; 
+import { CartProduct } from '../slice/cartSlice';
 
 const ProductItems: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: product, error, isLoading } = useGetProductQuery(id);
   const [mainImage, setMainImage] = useState<string>('');
-  const [cart, setCart] = useState<{ [key: number]: number }>({});
-  const { cartCount, addToCart, removeFromCart } = useCart();
+  const [cartProduct, setCartProduct] = useState<CartProduct[]>([]);
+  const { addToCart, removeFromCart } = useCart();
 
   useEffect(() => {
     if (product) {
@@ -23,14 +24,10 @@ const ProductItems: React.FC = () => {
 
   useEffect(() => {
     const savedCart = loadCartFromLocalStorage();
-    if (savedCart) {
-      const cartCount: { [key: number]: number } = {};
-      savedCart.products.forEach((product: any) => {
-        cartCount[product.id] = product.quantity;
-      });
-      setCart(cartCount);
+    if (savedCart && savedCart.products) {
+        setCartProduct(savedCart.products);
     }
-  }, []);
+}, []);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading product</div>;
@@ -38,25 +35,24 @@ const ProductItems: React.FC = () => {
 
   const discountedPrice = product.price * (1 - product.discountPercentage / 100);
   const ratingStars = Math.round(product.rating);
-  const isInCart = cartCount[product.id] || 0;
+  const productId = Number(id);
+  const isInCart = cartProduct.find(product => product.id === productId)?.quantity || 0;
 
   const handleAddToCart = () => {
-    const newCart = { ...cart, [product.id]: (cart[product.id] || 0) + 1 };
-    setCart(newCart);
-    addToCart(product.id);
-  };
+    const updatedProducts = cartProduct.map(product => 
+        product.id === productId ? { ...product, quantity: product.quantity + 1 } : product
+    );
+    setCartProduct(updatedProducts);
+    addToCart(product);
+};
 
-  const handleRemoveFromCart = () => {
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      newCart[product.id]--;
-      if (newCart[product.id] <= 0) {
-        delete newCart[product.id];
-      }
-      setCart(newCart);
-      removeFromCart(product.id);
-    }
-  };
+const handleRemoveFromCart = () => {
+    const updatedProducts = cartProduct.map(product => 
+        product.id === productId ? { ...product, quantity: product.quantity - 1 } : product
+    ).filter(product => product.quantity > 0);
+    setCartProduct(updatedProducts);
+    removeFromCart(productId);
+};
 
   return (
     <section className='second-container product'>

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
-import { fetchCartByUser, selectCartStatus, selectCartError, Cart } from '../slice/cartSlice';
+import { fetchCart, selectCartStatus, selectCartError, Cart } from '../slice/cartSlice';
 import useUser from '../hooks/useUser';
 
 interface CartContextProps {
@@ -11,7 +11,14 @@ interface CartContextProps {
     reloadCart: () => void;
 }
 
-const CartContext = createContext<CartContextProps | undefined>(undefined);
+const defaultCartContext: CartContextProps = {
+    cart: null,
+    cartStatus: 'idle',
+    cartError: null,
+    reloadCart: () => {},
+};
+
+const CartContext = createContext<CartContextProps>(defaultCartContext);
 
 export const useCartContext = (): CartContextProps => {
     const context = useContext(CartContext);
@@ -23,20 +30,20 @@ export const useCartContext = (): CartContextProps => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch: AppDispatch = useDispatch();
-    const cart = useSelector((state: RootState) => state.cart.cart);
+    const cart = useSelector((state: RootState) => state.cart.cartCount);
     const cartStatus = useSelector(selectCartStatus);
     const cartError = useSelector(selectCartError);
     const { user } = useUser();
 
     useEffect(() => {
-        if (user?.id) {
-            dispatch(fetchCartByUser(user.id));
+        if (user?.token) {
+            dispatch(fetchCart(user.token));
         }
     }, [dispatch, user]);
 
     const reloadCart = () => {
-        if (user?.id) {
-            dispatch(fetchCartByUser(user.id));
+        if (user?.token) {
+            dispatch(fetchCart(user.token));
         }
     };
 

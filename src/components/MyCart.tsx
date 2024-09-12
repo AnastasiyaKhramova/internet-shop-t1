@@ -25,8 +25,8 @@ const MyCart: React.FC = () => {
                 : cart?.products?.filter(p => p.id !== productId) ?? [];
 
             await dispatch(updateCart({
-                cartId,
                 products: updatedProducts,
+                token: token,
                 merge: false,
                 headers: { Authorization: `Bearer ${token}` }
             })).unwrap();
@@ -38,60 +38,6 @@ const MyCart: React.FC = () => {
             setIsUpdating(false);
         }
     };
-
-    // const handleAddToCart = async (productId: number) => {
-    //     if (isUpdating || !token || !cartId) return;
-    //     setIsUpdating(true);
-
-    //     try {
-    //         const product = cart?.products.find(p => p.id === productId);
-    //         const newQuantity = product ? product.quantity + 1 : 1;
-    //         await dispatch(updateCart({
-    //             cartId,
-    //             products: [{ id: productId, quantity: newQuantity }],
-    //             merge: false,
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`, 
-    //             }
-    //         })).unwrap();
-
-    //         reloadCart(); 
-    //     } catch (error) {
-    //         console.error('Failed to add product to cart', error);
-    //     } finally {
-    //         setIsUpdating(false);
-    //     }
-    // };
-
-    // const handleRemoveFromCart = async (productId: number, removeAll = false) => {
-    //     if (isUpdating || !token || !cartId) return;
-    //     setIsUpdating(true);
-
-    //     try {
-    //         const product = cart?.products.find(p => p.id === productId);
-    //         if (product) {
-    //             const newQuantity = removeAll ? 0 : product.quantity - 1;
-    //             const updatedProducts = newQuantity > 0 
-    //                 ? [{ id: productId, quantity: newQuantity }] 
-    //                 : cart?.products?.filter(p => p.id !== productId) ?? [];
-
-    //             await dispatch(updateCart({
-    //                 cartId,
-    //                 products: updatedProducts,
-    //                 merge: false,
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`, 
-    //                 }
-    //             })).unwrap();
-
-    //             reloadCart(); 
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to remove product from cart', error);
-    //     } finally {
-    //         setIsUpdating(false);
-    //     }
-    // };
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;

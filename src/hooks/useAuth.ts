@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getToken, setToken, removeToken } from '../utils/auth';
 import { fetchUserByToken } from '../api/authApi';
-import { fetchCartByUser } from '../slice/cartSlice';
+import { fetchCart } from '../slice/cartSlice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../store/store';
 import { setUser } from '../slice/userSlice';
@@ -51,7 +51,7 @@ export const useAuth = () => {
             setToken(data.token);
             dispatch(setUser(data));
             setIsAuthenticated(true);
-            dispatch(fetchCartByUser(data.id));
+            dispatch(fetchCart(data.id));
         } catch (error) {
             console.error('Login error', error);
             throw error;

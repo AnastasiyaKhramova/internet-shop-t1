@@ -37,7 +37,7 @@ const Header: React.FC<HiddenProps> = ({isHidden}) => {
                     <nav className='menu__cart' aria-label="Navigation">
                         <Link to='/cart' aria-label="Cart">Cart</Link>
                         <img src={cartImage} alt="cart" />
-                        {cart && cart.totalProducts > 0 && (
+                        {cart && cart.totalProducts !== undefined && cart.totalProducts > 0 && (
                             <div className='menu__cart_count'>{cart.totalProducts}</div>
                         )}
                     </nav>

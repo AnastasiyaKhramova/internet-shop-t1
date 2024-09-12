@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
 import { useDispatch, useSelector } from 'react-redux';
-import { CartProduct, addToCart, removeFromCart, updateQuantity, selectCart } from '../slice/cartSlice';
+import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 
@@ -76,21 +76,12 @@ const Catalog: React.FC = () => {
     }, [data, queryError]);
 
     const handleAddToCart = (product: CartProduct) => {
-        dispatch(addToCart(product));
+        dispatch(addProductToCart(product));
     };
 
     const handleRemoveFromCart = (productId: number) => {
-        dispatch(removeFromCart(productId));
+        dispatch(removeProductFromCart(productId));
     };
-
-    const handleUpdateQuantity = (productId: number, quantity: number) => {
-        if (quantity > 0) {
-            dispatch(updateQuantity({ id: productId, quantity }));
-        } else {
-            handleRemoveFromCart(productId); 
-        }
-    };
-
 
     return (
         <section id='catalog' className='second-container'>
@@ -119,7 +110,6 @@ const Catalog: React.FC = () => {
                                     isInCart={isInCart}
                                     onAdd={() => handleAddToCart(product)}
                                     onRemove={() => handleRemoveFromCart(product.id)}
-                                    onUpdateQuantity={(quantity) => handleUpdateQuantity(product.id, quantity)}
                                 />
                             );
                         })}
