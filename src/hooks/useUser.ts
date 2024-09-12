@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useGetCurrentUserQuery } from '../api/userApi'; 
 import { getToken } from '../utils/auth'; 
 
@@ -12,7 +11,6 @@ export interface User {
 const useUser = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
     const token = getToken(); 
 
     const { data, error, isLoading } = useGetCurrentUserQuery(token ?? '', {
@@ -20,8 +18,8 @@ const useUser = () => {
     });
 
     useEffect(() => {
-        if (!token) {
-            navigate('/login'); 
+        if (!token) { 
+            setLoading(false);
             return;
         }
 
@@ -31,11 +29,11 @@ const useUser = () => {
             setUser(data); 
             setLoading(false);
         } else if (error) {
-            navigate('/login');
+            setLoading(false);
         }
-    }, [data, error, isLoading, token, navigate]);
+    }, [data, error, isLoading, token]);
 
-    return { user, loading:isLoading };
+    return { user, loading};
 };
 
 export default useUser;

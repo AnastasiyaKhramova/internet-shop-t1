@@ -5,7 +5,7 @@ import useCart from '../hooks/useCart';
 import Button from './Button';
 import ProductInCart from './ProductInCart';
 import ErrorPage from '../pages/ErrorPage';
-import { getCartFromLocalStorage } from '../utils/localstorage'; 
+import { loadCartFromLocalStorage, saveCartToLocalStorage } from '../utils/localstorage'; 
 
 const ProductItems: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,13 +22,15 @@ const ProductItems: React.FC = () => {
   }, [product]);
 
   useEffect(() => {
-    const savedCart = getCartFromLocalStorage();
-    setCart(savedCart);
+    const savedCart = loadCartFromLocalStorage();
+    if (savedCart) {
+      const cartCount: { [key: number]: number } = {};
+      savedCart.products.forEach((product: any) => {
+        cartCount[product.id] = product.quantity;
+      });
+      setCart(cartCount);
+    }
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading product</div>;
