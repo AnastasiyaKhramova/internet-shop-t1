@@ -6,8 +6,8 @@ import MyCart from "../components/MyCart"
 function Cart() {
     useEffect(() => {
         document.title = 'My cart | Goods4you';
-      }, []);
-    return (
+    }, []);
+    return(
         <div>
             <Header />
             <MyCart />

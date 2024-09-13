@@ -52,6 +52,10 @@ body {
     gap: 40px;
 }
 
+.menu__hidden {
+    visibility: hidden;
+}
+
 .menu a {
     color: var(--text-color);
     font-size: 14px;
@@ -197,7 +201,7 @@ body {
 
 .img__card img {
     width: 100%;
-    height: auto;
+    height: 300px;
     display: block;
     transition: opacity 0.3s ease;
     margin-bottom: 10px;
@@ -540,6 +544,10 @@ body {
     color: var(--text-color-dark);
 }
 
+.cart-item_price h3:hover {
+    text-decoration: underline;
+}
+
 .cart-item_price p {
     font-size: 18px;
     color: var(--text-color-dark);
@@ -583,7 +591,7 @@ body {
     align-items: center;
 }
 
-.cart-item_buy--dimmed{
+.cart-item_buy--dimmed {
     opacity: 60%;
 }
 
@@ -653,6 +661,38 @@ body {
     font-weight: 600;
     line-height: 36px;
     color: #B2B5BB;
+}
+
+/* Login */
+
+.registration {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.registration__title {
+    margin-top: 140px;
+    margin-bottom: 48px;
+    font-size: 36px;
+    line-height: 56px;
+    color: var(--text-color-dark);
+}
+
+.registration__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 600px;
+    min-height: 426px;
+    border: 1px solid rgba(196, 196, 196);
+    padding: 60px;
+    gap: 60px;
+    margin-bottom: 230px;
+}
+
+.registration__input{
+    min-width: 480px;
 }
 
 /* Media */

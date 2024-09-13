@@ -1,56 +1,96 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
-import useCart from '../hooks/useCart';
+import { useDispatch, useSelector } from 'react-redux';
+import { CartProduct, addToCart, removeFromCart, updateQuantity, selectCart } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
-
-export interface Product {
-    id: number;
-    title: string;
-    price: number;
-    discountPercentage: number;
-    thumbnail: string;
-}
-
-export interface CartProduct extends Product {
-    quantity: number;
-}
 
 const Catalog: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [skip, setSkip] = useState<number>(0);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<CartProduct[]>([]);
+    const [totalProducts, setTotalProducts] = useState<number>(0);
+    const [error, setError] = useState<string | null>(null);
     const limit = 12;
 
-    // Запрос на получение продуктов с учетом поиска
-    const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
+    const createQueryParams = (params: Record<string, string | number | undefined>) => {
+        const searchParams = new URLSearchParams();
 
-    // Хук для управления корзиной
-    const { cartCount, addToCart, removeFromCart } = useCart();
+        Object.keys(params).forEach(key => {
+            const value = params[key];
+            if (value !== undefined) {
+                searchParams.append(key, String(value));
+            }
+        });
 
-    // Функция для обработки изменений в строке поиска
+        return searchParams.toString();
+    };
+
+    const queryParamsString = createQueryParams({ q: searchTerm, limit, skip });
+
+    const queryParams = Object.fromEntries(new URLSearchParams(queryParamsString));
+
+    const { data, error: queryError, isLoading } = useSearchProductsQuery(queryParams);
+
+    const dispatch = useDispatch();
+    const cart = useSelector(selectCart);
+
+    useEffect(() => {
+        if (data && data.total) {
+            setTotalProducts(data.total);
+        }
+    }, [data]);
+
+    const getProductQuantityInCart = (productId: number) => {
+        const product = cart?.products.find(p => p.id === productId);
+        return product ? product.quantity : 0;
+    };
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
         setSearchTerm(search);
         setSkip(0);
         setProducts([]);
+        if (data && data.products) {
+            const filteredProducts = data.products.filter((product: CartProduct) =>
+                product.title.toLowerCase().includes(search)
+            );
+            setProducts(filteredProducts);
+        }
     };
 
-    // Декорируем обработчик поиска функцией debounce
-    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 500), []);
+    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
 
-    // Функция для загрузки дополнительных продуктов при клике на "Show More"
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);
     };
 
-    // Обновление состояния продуктов при изменении данных из запроса
     useEffect(() => {
-        if (data && data.products) {
+        if (queryError) {
+            setError('Failed to load products. Please try again later.');
+        } else if (data && data.products) {
+            setError(null);
             setProducts(prevProducts => [...prevProducts, ...data.products]);
         }
-    }, [data]);
+    }, [data, queryError]);
+
+    const handleAddToCart = (product: CartProduct) => {
+        dispatch(addToCart(product));
+    };
+
+    const handleRemoveFromCart = (productId: number) => {
+        dispatch(removeFromCart(productId));
+    };
+
+    const handleUpdateQuantity = (productId: number, quantity: number) => {
+        if (quantity > 0) {
+            dispatch(updateQuantity({ id: productId, quantity }));
+        } else {
+            handleRemoveFromCart(productId); 
+        }
+    };
+
 
     return (
 
@@ -71,26 +111,24 @@ const Catalog: React.FC = () => {
                 ) : (
                     <div className='catalog__card'>
                         {products.map(product => {
-                            const isInCart = cartCount[product.id] > 0;
-                            const cartProduct: CartProduct = {
-                                ...product,
-                                quantity: cartCount[product.id] || 0,
-                            };
-
+                            const quantityInCart = getProductQuantityInCart(product.id);
+                            const isInCart = quantityInCart > 0;
                             return (
                                 <ProductCard
                                     key={product.id}
-                                    product={cartProduct}
+                                    product={product}
                                     isInCart={isInCart}
-                                    onAddToCart={() => addToCart(product.id)}
-                                    onRemoveFromCart={() => removeFromCart(product.id)}
+                                    onAdd={() => handleAddToCart(product)}
+                                    onRemove={() => handleRemoveFromCart(product.id)}
+                                    onUpdateQuantity={(quantity) => handleUpdateQuantity(product.id, quantity)}
                                 />
                             );
                         })}
 
                     </div>
                 )}
-                {data && products.length < data.total && (
+
+                {data && products.length < totalProducts && (
                     <div className="button-container">
 
                         <Button btnName='Show more' onClick={handleShowMore} />

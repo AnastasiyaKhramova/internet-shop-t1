@@ -4,16 +4,20 @@ import ProductInCart from './ProductInCart';
 import Button from '../components/Button';
 import basket from '../assets/img/cart.png';
 import { CartProduct } from '../slice/cartSlice';
+import useCart from '../hooks/useCart';
 
 export interface ProductCardProps {
     product: CartProduct;
     isInCart: boolean;
-    onAddToCart: () => void;
-    onRemoveFromCart: () => void;
+    onAdd: () => void;
+    onRemove: () => void;
+    onUpdateQuantity: (quantity: number) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCart, onRemoveFromCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+    const { cartCount, addToCart, removeFromCart } = useCart();
     const discountedPrice = product.price * (1 - product.discountPercentage / 100);
+    const quantityInCart = cartCount[product.id] || 0;
 
     return (
         <div className="card">
@@ -33,11 +37,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCar
                     <p>${discountedPrice.toFixed(2)}</p>
                 </div>
 
-                {isInCart ? (
+                {quantityInCart > 0 ? (
                     <ProductInCart
-                        quantity={product.quantity}
-                        onAdd={onAddToCart}
-                        onRemove={onRemoveFromCart} 
+                        quantity={quantityInCart}
+                        onAdd={() => addToCart(product.id)}
+                        onRemove={() => removeFromCart(product.id)}
                     />
                 ) : (
                     <Button
@@ -46,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isInCart, onAddToCar
                         width='50px'
                         height='50px'
                         aria-label={`Add ${product.title} to cart`}
-                        onClick={onAddToCart}
+                        onClick={() => addToCart(product.id)}
                     />
                 )}
             </div>
