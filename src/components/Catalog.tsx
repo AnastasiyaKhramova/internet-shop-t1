@@ -1,116 +1,105 @@
-import imgSnickers from '../assets/img/snickers.jpg';
-import cart from '../assets/img/cart.png';
-import Button from './Button';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import debounce from 'debounce';
+import { useSearchProductsQuery } from '../api/productApi';
+import useCart from '../hooks/useCart';
+import ProductCard from '../components/ProductCard';
+import Button from '../components/Button';
 
-function Catalog() {
-    const products = [
-        {
-            id: 1,
-            img: imgSnickers, name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 2,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 3,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 4,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 5,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 6,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 7,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 8,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 9,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 10,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 11,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-        {
-            id: 12,
-            img: imgSnickers,
-            name: "Essence Mascara Lash Princess",
-            price: 110,
-        },
-
-
-    ]
-    return (
-        <>
-            <section id='catalog' className='second-container'>
-                <div className='catalog'>
-                    <h2 className='catalog__title'>Catalog</h2>
-                    <input className='catalog__find' type="text" placeholder='Search by title' aria-label="Find product" />
-                    <div className='catalog__card'>
-                        {products.map(product => (
-                            <div className="card" key={product.id}>
-                                <div className="img__card">
-                                    <img src={product.img} alt={`card ${product.id}`} />
-                                    <div className="card__hover">
-                                        <span>Show Details</span>
-                                    </div>
-                                </div>
-                                <div className='card__desc'>
-                                    <div className="text__Card">
-                                        <Link to={`/product/${product.id}`}><h4>{product.name}</h4></Link>
-                                        <p>${product.price}</p>
-                                    </div>
-                                    <Button imgSrc={cart} altText="basket" width='50px' height='50px' aria-label={`Add ${product.name} to cart`} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="button-container">
-                        <Button btnName='Show more' />
-                    </div>
-                </div>
-            </section>
-        </>
-    )
+export interface Product {
+    id: number;
+    title: string;
+    price: number;
+    discountPercentage: number;
+    thumbnail: string;
 }
 
-export default Catalog
+export interface CartProduct extends Product {
+    quantity: number;
+}
+
+const Catalog: React.FC = () => {
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [skip, setSkip] = useState<number>(0);
+    const [products, setProducts] = useState<Product[]>([]);
+    const limit = 12;
+
+    // Запрос на получение продуктов с учетом поиска
+    const { data, error, isLoading } = useSearchProductsQuery({ q: searchTerm, limit, skip });
+
+    // Хук для управления корзиной
+    const { cartCount, addToCart, removeFromCart } = useCart();
+
+    // Функция для обработки изменений в строке поиска
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const search = e.target.value.toLowerCase();
+        setSearchTerm(search);
+        setSkip(0);
+        setProducts([]);
+    };
+
+    // Декорируем обработчик поиска функцией debounce
+    const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 500), []);
+
+    // Функция для загрузки дополнительных продуктов при клике на "Show More"
+    const handleShowMore = () => {
+        setSkip(prevSkip => prevSkip + limit);
+    };
+
+    // Обновление состояния продуктов при изменении данных из запроса
+    useEffect(() => {
+        if (data && data.products) {
+            setProducts(prevProducts => [...prevProducts, ...data.products]);
+        }
+    }, [data]);
+
+    return (
+
+        <section id='catalog' className='second-container'>
+            <div className='catalog'>
+                <h2 className='catalog__title'>Catalog</h2>
+                <input
+                    className='catalog__find'
+                    type="text"
+                    placeholder='Search by title'
+                    aria-label="Find product"
+                    onChange={debouncedHandleSearchChange}
+                />
+                {isLoading ? (
+                    <div>Loading...</div>
+                ) : error ? (
+                    <div>Error loading products</div>
+                ) : (
+                    <div className='catalog__card'>
+                        {products.map(product => {
+                            const isInCart = cartCount[product.id] > 0;
+                            const cartProduct: CartProduct = {
+                                ...product,
+                                quantity: cartCount[product.id] || 0,
+                            };
+
+                            return (
+                                <ProductCard
+                                    key={product.id}
+                                    product={cartProduct}
+                                    isInCart={isInCart}
+                                    onAddToCart={() => addToCart(product.id)}
+                                    onRemoveFromCart={() => removeFromCart(product.id)}
+                                />
+                            );
+                        })}
+
+                    </div>
+                )}
+                {data && products.length < data.total && (
+                    <div className="button-container">
+
+                        <Button btnName='Show more' onClick={handleShowMore} />
+
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+export default Catalog;
