@@ -53,6 +53,7 @@ const Catalog: React.FC = () => {
     }, [data]);
 
     return (
+
         <section id='catalog' className='second-container'>
             <div className='catalog'>
                 <h2 className='catalog__title'>Catalog</h2>
@@ -86,11 +87,14 @@ const Catalog: React.FC = () => {
                                 />
                             );
                         })}
+
                     </div>
                 )}
                 {data && products.length < data.total && (
                     <div className="button-container">
+
                         <Button btnName='Show more' onClick={handleShowMore} />
+
                     </div>
                 )}
             </div>

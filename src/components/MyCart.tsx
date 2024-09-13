@@ -78,20 +78,34 @@ function MyCart() {
                                     )
                                     }
                                 </div>
+
                             ))}
                         </div>
                         <div>
                             <div className="cart__items_costs">
                                 <h4 className="cart__items_total">Total count</h4>
                                 <p className="cart__items_total-count">{totalProducts} items</p>
+
+                                <div className="cart-item_btn">
+                                    <Button imgSrc={minus} width="50px" height="50px" aria-lable = "Remove goods"></Button>
+                                    <p>{cartItem.count}</p>
+                                    <Button imgSrc={plus} width="50px" height="50px" aria-lable = "Add goods"></Button>
+                                </div>
+                                <p className="cart-item_del">{cartItem.delete}</p>
+
                             </div>
                             <div className="cart__items_costs">
                                 <h3 className="cart__items_out-discont">Price without discount</h3>
                                 <p className="cart__items_out-discont-price">${totalPriceWithoutDiscount.toFixed(2)}</p>
                             </div>
+
                             <div className="cart__items_costs">
                                 <h2 className="cart__items_total-title">Total price</h2>
                                 <p className="cart__items_total-price">${totalPriceWithDiscount.toFixed(2)}</p>
+
+                            <div className="cart-item_btn cart-item_btn-buy">
+                                <Button imgSrc={cart} width="50px" height="50px" altText="cart" aria-lable = {`Add to cart`}></Button>
+
                             </div>
                         </div>
                     </div>
