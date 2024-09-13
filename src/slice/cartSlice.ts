@@ -44,28 +44,28 @@ const initialState: CartState = {
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (token: string, thunkAPI) => {
-    const cartId = localStorage.getItem("cartId");
-    if (cartId) {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
       try {
-        const data = await fetchCartFromAPI(cartId, token);
+        const data = await fetchCartFromAPI(userId, token);
         const cart: Cart = {
           id: data.id,
           totalProducts: data.totalProducts,
           totalQuantity: data.totalQuantity,
           total: data.total,
-          products: data.products.map((product: any) => ({
+          products: data.products.map((product: CartProduct) => ({
             id: product.id,
             title: product.title,
             price: product.price,
             quantity: product.quantity,
             discountPercentage: product.discountPercentage,
             thumbnail: product.thumbnail,
-            discountedTotal: product.discountedTotal,
+            discountedTotal: product.discountTotal,
             total: product.total,
           })),
         };
         saveCartToLocalStorage(cart);
-        return { cartId, cart };
+        return { userId, cart };
       } catch (error: any) {
         return thunkAPI.rejectWithValue(error.message);
       }
@@ -111,7 +111,7 @@ export const createCart = createAsyncThunk(
       }
 
       const data = await response.json();
-      localStorage.setItem("cartId", data.id);
+      localStorage.setItem("cartId", data.id.toString());
       return { cartId: data.id, cart: data };
     } catch (error) {
       console.error("Error creating cart:", error);
@@ -130,8 +130,6 @@ export const updateCart = createAsyncThunk(
     {
       products,
       token,
-      merge,
-      headers,
     }: {
       products: { id: number; quantity: number }[];
       token: string;
@@ -255,14 +253,14 @@ const cartSlice = createSlice({
     builder
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.cartCount = action.payload.cart;
-        state.cartId = action.payload.cartId;
+        state.cartId = action.payload.userId;
         state.status = "succeeded";
-        saveCartToLocalStorage(action.payload.cart);
+        saveCartToLocalStorage(state.cartCount);
       })
       .addCase(updateCart.fulfilled, (state, action) => {
         state.cartCount = action.payload;
         state.status = "succeeded";
-        saveCartToLocalStorage(action.payload);
+        saveCartToLocalStorage(state.cartCount);
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.error = action.payload as string;

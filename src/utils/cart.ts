@@ -1,5 +1,5 @@
 export const fetchCartFromAPI = async (cartId: string, token: string) => {
-  const response = await fetch(`https://yourapi.com/carts/${cartId}`, {
+  const response = await fetch(`https://dummyjson.com/carts/${cartId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -11,13 +11,12 @@ export const fetchCartFromAPI = async (cartId: string, token: string) => {
     throw new Error("Failed to fetch cart");
   }
 };
-
 export const updateCartInAPI = async (
   cartId: string,
   products: { id: number; quantity: number }[],
   token: string
 ) => {
-  const response = await fetch(`https://yourapi.com/carts/${cartId}`, {
+  const response = await fetch(`https://dummyjson.com/carts/${cartId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

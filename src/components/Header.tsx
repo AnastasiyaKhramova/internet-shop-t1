@@ -1,17 +1,19 @@
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import cartImage from '../assets/img/cart.png';
-import { useCartContext } from '../contexts/CartContext';
+import { useCart } from '../contexts/CartContext';
+import { selectCart } from '../slice/cartSlice';
 import useUser from '../hooks/useUser';
 
 interface HiddenProps {
-    isHidden: boolean;
+    isHidden?: boolean;
 }
 
 const Header: React.FC<HiddenProps> = ({isHidden}) => {
     const location = useLocation();
     const { user, loading: userLoading } = useUser();
-    const { cart, cartStatus, cartError } = useCartContext();
+    const cart = useSelector(selectCart);
 
     useEffect(() => {
         if (location.hash) {
@@ -22,10 +24,13 @@ const Header: React.FC<HiddenProps> = ({isHidden}) => {
         }
     }, [location]);
 
-    if (userLoading) return <div>Loading user data...</div>;
-    if (cartStatus === 'loading') return <div>Loading cart...</div>;
-    if (cartStatus === 'failed') return <div>Error loading cart: {cartError}</div>;
+    useEffect(() => {
+        console.log('Cart updated:', cart);
+    }, [cart]);
 
+    // if (userLoading || cartStatus === 'loading') return <div>Loading user data...</div>;
+    // if (!cart) return <div>Loading cart...</div>;
+    // if (cartStatus === 'failed') return <div>Error loading cart</div>;
 
     return (
         <header className='container'>
@@ -37,7 +42,7 @@ const Header: React.FC<HiddenProps> = ({isHidden}) => {
                     <nav className='menu__cart' aria-label="Navigation">
                         <Link to='/cart' aria-label="Cart">Cart</Link>
                         <img src={cartImage} alt="cart" />
-                        {cart && cart.totalProducts !== undefined && cart.totalProducts > 0 && (
+                        {cart?.totalProducts !== undefined && cart.totalProducts > 0 && (
                             <div className='menu__cart_count'>{cart.totalProducts}</div>
                         )}
                     </nav>

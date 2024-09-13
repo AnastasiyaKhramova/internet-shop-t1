@@ -1,55 +1,81 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store/store';
-import { fetchCart, selectCartStatus, selectCartError, Cart } from '../slice/cartSlice';
-import useUser from '../hooks/useUser';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import {
+  loadCartFromLocalStorage,
+  saveCartToLocalStorage,
+} from "../utils/localstorage";
+import { fetchCartFromAPI } from "../utils/cart";
+import { useAuth } from "./AuthContext";
+import { Cart } from "../slice/cartSlice";
 
 interface CartContextProps {
-    cart: Cart | null; 
-    cartStatus: string;
-    cartError: string | null;
-    reloadCart: () => void;
+  cart: Cart | null;
+  refreshCart: () => void;
+  cartStatus: "idle" | "loading" | "succeeded" | "failed";
+  cartError: string | null;
 }
 
-const defaultCartContext: CartContextProps = {
-    cart: null,
-    cartStatus: 'idle',
-    cartError: null,
-    reloadCart: () => {},
+interface CartProviderProps {
+  children: ReactNode;
+}
+
+const CartContext = createContext<CartContextProps | null>(null);
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
 };
 
-const CartContext = createContext<CartContextProps>(defaultCartContext);
+const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  const [cart, setCart] = useState<Cart | null>(loadCartFromLocalStorage());
+  const [cartStatus, setCartStatus] = useState<
+    "idle" | "loading" | "succeeded" | "failed"
+  >("idle");
+  const [cartError, setCartError] = useState<string | null>(null);
+  const authContext = useAuth();
 
-export const useCartContext = (): CartContextProps => {
-    const context = useContext(CartContext);
-    if (!context) {
-        throw new Error('useCartContext must be used within a CartProvider');
+  useEffect(() => {
+    if (authContext?.isAuthenticated && !cart) {
+      refreshCart();
     }
-    return context;
+  }, [authContext?.isAuthenticated, cart]);
+
+  const refreshCart = async () => {
+    setCartStatus("loading");
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+      if (token && userId) {
+        const data = await fetchCartFromAPI(userId, token);
+        setCart(data);
+        saveCartToLocalStorage(data);
+        setCartStatus("succeeded");
+      } else {
+        setCartError("Token or user ID not found");
+        setCartStatus("failed");
+      }
+    } catch (error) {
+      console.error("Error refreshing cart:", error);
+      setCartError("An unknown error occurred");
+      setCartStatus("failed");
+    }
+  };
+
+  return (
+    <CartContext.Provider
+      value={{ cart, refreshCart, cartStatus, cartError }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
 };
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const dispatch: AppDispatch = useDispatch();
-    const cart = useSelector((state: RootState) => state.cart.cartCount);
-    const cartStatus = useSelector(selectCartStatus);
-    const cartError = useSelector(selectCartError);
-    const { user } = useUser();
-
-    useEffect(() => {
-        if (user?.token) {
-            dispatch(fetchCart(user.token));
-        }
-    }, [dispatch, user]);
-
-    const reloadCart = () => {
-        if (user?.token) {
-            dispatch(fetchCart(user.token));
-        }
-    };
-
-    return (
-        <CartContext.Provider value={{ cart, cartStatus, cartError, reloadCart }}>
-            {children}
-        </CartContext.Provider>
-    );
-};
+export default CartProvider;
