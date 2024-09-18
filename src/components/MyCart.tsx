@@ -1,97 +1,24 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { AppDispatch } from '../store/store';
-import { updateCart } from '../slice/cartSlice';
+import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
-import { getToken } from '../utils/auth';
-import { useCartContext } from '../contexts/CartContext';
 
 const MyCart: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
-    const { cart, cartStatus, cartError, reloadCart } = useCartContext();
-    const [isUpdating, setIsUpdating] = useState(false);
-    const token = getToken();
-    const cartId = localStorage.getItem('cartId') || '';
+    const cart = useSelector(selectCart);
+    const [isLoading] = useState(false);
+    const [error] = useState<string | null>(null);
 
-    const handleCartUpdate = async (productId: number, quantity: number) => {
-        if (isUpdating || !token || !cartId) return;
-        setIsUpdating(true);
-
-        try {
-            const updatedProducts = quantity > 0
-                ? [{ id: productId, quantity }]
-                : cart?.products?.filter(p => p.id !== productId) ?? [];
-
-            await dispatch(updateCart({
-                cartId,
-                products: updatedProducts,
-                merge: false,
-                headers: { Authorization: `Bearer ${token}` }
-            })).unwrap();
-
-            reloadCart();
-        } catch (error) {
-            console.error('Failed to update cart', error);
-        } finally {
-            setIsUpdating(false);
-        }
+    const handleAddToCart = (product: CartProduct) => {
+        dispatch(addProductToCart(product));
     };
 
-    // const handleAddToCart = async (productId: number) => {
-    //     if (isUpdating || !token || !cartId) return;
-    //     setIsUpdating(true);
-
-    //     try {
-    //         const product = cart?.products.find(p => p.id === productId);
-    //         const newQuantity = product ? product.quantity + 1 : 1;
-    //         await dispatch(updateCart({
-    //             cartId,
-    //             products: [{ id: productId, quantity: newQuantity }],
-    //             merge: false,
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`, 
-    //             }
-    //         })).unwrap();
-
-    //         reloadCart(); 
-    //     } catch (error) {
-    //         console.error('Failed to add product to cart', error);
-    //     } finally {
-    //         setIsUpdating(false);
-    //     }
-    // };
-
-    // const handleRemoveFromCart = async (productId: number, removeAll = false) => {
-    //     if (isUpdating || !token || !cartId) return;
-    //     setIsUpdating(true);
-
-    //     try {
-    //         const product = cart?.products.find(p => p.id === productId);
-    //         if (product) {
-    //             const newQuantity = removeAll ? 0 : product.quantity - 1;
-    //             const updatedProducts = newQuantity > 0 
-    //                 ? [{ id: productId, quantity: newQuantity }] 
-    //                 : cart?.products?.filter(p => p.id !== productId) ?? [];
-
-    //             await dispatch(updateCart({
-    //                 cartId,
-    //                 products: updatedProducts,
-    //                 merge: false,
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`, 
-    //                 }
-    //             })).unwrap();
-
-    //             reloadCart(); 
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to remove product from cart', error);
-    //     } finally {
-    //         setIsUpdating(false);
-    //     }
-    // };
+    const handleRemoveFromCart = (productId: number) => {
+        dispatch(removeProductFromCart(productId));
+    };
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;
@@ -108,12 +35,12 @@ const MyCart: React.FC = () => {
 
     const totalPriceWithDiscount = (totalPriceWithoutDiscount - totalDiscount);
 
-    if (cartStatus === 'loading') {
+    if (isLoading) {
         return <div>Loading...</div>;
     }
 
-    if (cartStatus === 'failed') {
-        return <div>Error: {cartError}</div>;
+    if (error) {
+        return <div>Error loading cart: {error}</div>;
     }
 
     return (
@@ -137,20 +64,20 @@ const MyCart: React.FC = () => {
                                         <div className="cart-item_btn">
                                             <ProductInCart
                                                 quantity={product.quantity}
-                                                onAdd={() => handleCartUpdate(product.id, product.quantity + 1)}
-                                                onRemove={() => handleCartUpdate(product.id, product.quantity - 1)}
+                                                onAdd={() => handleAddToCart(product)}
+                                                onRemove={() => handleRemoveFromCart(product.id)}
                                             />
                                         </div>
-                                        <button className="cart-item_del" onClick={() => handleCartUpdate(product.id, 0)}>Delete</button>
+                                        <button className="cart-item_del" onClick={() => handleRemoveFromCart(product.id)}>Delete</button>
                                     </>
                                 ) : (
                                     <Button
                                         imgSrc={basket}
-                                        altText='basket'
-                                        width='50px'
-                                        height='50px'
+                                        altText="basket"
+                                        width="50px"
+                                        height="50px"
                                         aria-label={`Add ${product.title} to cart`}
-                                        onClick={() => handleCartUpdate(product.id, product.quantity + 1)}
+                                        onClick={() => handleAddToCart(product)}
                                     />
                                 )}
 
@@ -202,7 +129,7 @@ const MyCart: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <h2 className='cart__noItems'>No items</h2>
+                <h2 className="cart__noItems">No items</h2>
             )}
         </section>
     );

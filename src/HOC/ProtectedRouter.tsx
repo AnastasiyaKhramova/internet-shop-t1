@@ -1,13 +1,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
   element: React.ReactElement;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
-  const { loading, isAuthenticated } = useAuth(); 
+  const authContext = useAuth();
+  const loading = authContext?.loading ?? true;
+  const isAuthenticated = authContext?.isAuthenticated ?? false;
 
   if (loading) {
     return <div>Loading...</div>; 

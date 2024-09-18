@@ -1,23 +1,37 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUser, clearUser } from '../slice/userSlice';
 import { getToken, setToken, removeToken } from '../utils/auth';
 import { fetchUserByToken } from '../api/authApi';
-import { fetchCartByUser } from '../slice/cartSlice';
-import { useDispatch } from 'react-redux';
+import { fetchCart } from '../slice/cartSlice';
 import { AppDispatch } from '../store/store';
-import { setUser } from '../slice/userSlice';
 
-export const useAuth = () => {
+interface AuthContextProps {
+    isAuthenticated: boolean;
+    loading: boolean;
+    login: (username: string, password: string) => Promise<void>;
+    logout: () => void;
+}
+interface AuthProviderProps {
+    children: ReactNode;
+}
+
+const AuthContext = createContext<AuthContextProps | null>(null);
+
+export const useAuth = () => useContext(AuthContext);
+
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         const token = getToken();
-
         if (token) {
             fetchUserByToken(token)
                 .then(user => {
                     dispatch(setUser(user));
+                    dispatch(fetchCart(user.id));
                     setIsAuthenticated(true);
                 })
                 .catch(() => {
@@ -37,32 +51,27 @@ export const useAuth = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to login');
-            }
-
             const data = await response.json();
-
-            if (!data || !data.token || !data.id) {
-                throw new Error('Invalid response data');
-            }
-
             setToken(data.token);
             dispatch(setUser(data));
+            dispatch(fetchCart(data.id));
             setIsAuthenticated(true);
-            dispatch(fetchCartByUser(data.id));
         } catch (error) {
             console.error('Login error', error);
-            throw error;
         }
     };
 
     const logout = () => {
         removeToken();
-        dispatch(setUser(null));
+        dispatch(clearUser());
         setIsAuthenticated(false);
     };
 
-    return { login, logout, loading, isAuthenticated };
+    return (
+        <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
+
+export default AuthProvider;

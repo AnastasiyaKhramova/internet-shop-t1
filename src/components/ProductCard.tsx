@@ -11,13 +11,13 @@ export interface ProductCardProps {
     isInCart: boolean;
     onAdd: () => void;
     onRemove: () => void;
-    onUpdateQuantity: (quantity: number) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-    const { cartCount, addToCart, removeFromCart } = useCart();
+    const { cart, addToCart, removeFromCart } = useCart();
     const discountedPrice = product.price * (1 - product.discountPercentage / 100);
-    const quantityInCart = cartCount[product.id] || 0;
+    const quantityInCart = cart?.products?.find((item) => item.id === product.id)?.quantity || 0;
+
 
     return (
         <div className="card">
@@ -40,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 {quantityInCart > 0 ? (
                     <ProductInCart
                         quantity={quantityInCart}
-                        onAdd={() => addToCart(product.id)}
+                        onAdd={() => addToCart(product)}
                         onRemove={() => removeFromCart(product.id)}
                     />
                 ) : (
@@ -50,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         width='50px'
                         height='50px'
                         aria-label={`Add ${product.title} to cart`}
-                        onClick={() => addToCart(product.id)}
+                        onClick={() => addToCart(product)}
                     />
                 )}
             </div>
