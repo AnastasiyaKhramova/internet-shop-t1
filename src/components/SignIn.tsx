@@ -1,24 +1,32 @@
 import { useState } from "react";
-import Button from "./Button"
+import Button from "./Button";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 
-const SingIn: React.FC = () => {
+const SignIn: React.FC = () => {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const authContext = useAuth(); 
+  const login = authContext?.login; 
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!login) {
+      setError('Authentication is not available');
+      return;
+    }
 
+    setLoading(true);
     try {
       await login(username, password);
       navigate('/');
     } catch (error) {
       setError('Invalid username or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,10 +58,9 @@ const SingIn: React.FC = () => {
             />
           )}
         </form>
-
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default SingIn
+export default SignIn;

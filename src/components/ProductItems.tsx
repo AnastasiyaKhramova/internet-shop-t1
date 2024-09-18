@@ -5,7 +5,7 @@ import useCart from '../hooks/useCart';
 import Button from './Button';
 import ProductInCart from './ProductInCart';
 import ErrorPage from '../pages/ErrorPage';
-import { loadCartFromLocalStorage, saveCartToLocalStorage } from '../utils/localstorage'; 
+import { loadCartFromLocalStorage } from '../utils/localstorage'; 
 
 const ProductItems: React.FC = () => {
   const { id } = useParams<{ id: string }>();

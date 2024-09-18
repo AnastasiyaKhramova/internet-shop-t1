@@ -4,6 +4,7 @@ import { getToken } from '../utils/auth';
 
 export interface User {
     id: number;
+    token: string;
     firstName: string;
     lastName: string;
 }

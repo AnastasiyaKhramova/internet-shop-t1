@@ -1,48 +1,51 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store/store';
-import { fetchCartByUser, selectCartStatus, selectCartError, Cart } from '../slice/cartSlice';
-import useUser from '../hooks/useUser';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { loadCartFromLocalStorage, saveCartToLocalStorage } from '../utils/localstorage';
+import { fetchCartFromAPI } from '../utils/cart';
+import { useAuth } from './AuthContext';
+import { Cart } from '../slice/cartSlice';
 
 interface CartContextProps {
-    cart: Cart | null; 
-    cartStatus: string;
-    cartError: string | null;
-    reloadCart: () => void;
+    cart: Cart | null;
+    refreshCart: () => void;
 }
 
-const CartContext = createContext<CartContextProps | undefined>(undefined);
+interface CartProviderProps {
+    children: ReactNode;
+}
 
-export const useCartContext = (): CartContextProps => {
-    const context = useContext(CartContext);
-    if (!context) {
-        throw new Error('useCartContext must be used within a CartProvider');
-    }
-    return context;
-};
+const CartContext = createContext<CartContextProps | null>(null);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const dispatch: AppDispatch = useDispatch();
-    const cart = useSelector((state: RootState) => state.cart.cart);
-    const cartStatus = useSelector(selectCartStatus);
-    const cartError = useSelector(selectCartError);
-    const { user } = useUser();
+export const useCart = () => useContext(CartContext);
 
+const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+    const [cart, setCart] = useState<Cart | null>(loadCartFromLocalStorage());
+    const authContext = useAuth(); 
+    
     useEffect(() => {
-        if (user?.id) {
-            dispatch(fetchCartByUser(user.id));
+        if (authContext?.isAuthenticated && cart === null) {
+            refreshCart();
         }
-    }, [dispatch, user]);
+    }, [authContext?.isAuthenticated]);  
 
-    const reloadCart = () => {
-        if (user?.id) {
-            dispatch(fetchCartByUser(user.id));
+    const refreshCart = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            if (token && userId) {
+                const data = await fetchCartFromAPI(userId, token);
+                setCart(data);
+                saveCartToLocalStorage(data);
+            }
+        } catch (error) {
+            console.error('Error refreshing cart:', error);
         }
     };
 
     return (
-        <CartContext.Provider value={{ cart, cartStatus, cartError, reloadCart }}>
+        <CartContext.Provider value={{ cart, refreshCart }}>
             {children}
         </CartContext.Provider>
     );
 };
+
+export default CartProvider;
