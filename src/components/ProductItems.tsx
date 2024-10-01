@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { useGetProductQuery } from '../api/productApi';
-import useCart from '../hooks/useCart';
 import Button from './Button';
 import ProductInCart from './ProductInCart';
 import ErrorPage from '../pages/ErrorPage';
-import { loadCartFromLocalStorage } from '../utils/localstorage'; 
-import { CartProduct } from '../slice/cartSlice';
+import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
 
 const ProductItems: React.FC = () => {
+  const dispatch = useDispatch();
+  const cart = useSelector(selectCart);
   const { id } = useParams<{ id: string }>();
   const { data: product, error, isLoading } = useGetProductQuery(id);
   const [mainImage, setMainImage] = useState<string>('');
-  const [cartProduct, setCartProduct] = useState<CartProduct[]>([]);
-  const { addToCart, removeFromCart } = useCart();
 
   useEffect(() => {
     if (product) {
@@ -22,12 +21,7 @@ const ProductItems: React.FC = () => {
     }
   }, [product]);
 
-  useEffect(() => {
-    const savedCart = loadCartFromLocalStorage();
-    if (savedCart && savedCart.products) {
-        setCartProduct(savedCart.products);
-    }
-}, []);
+
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading product</div>;
@@ -35,23 +29,13 @@ const ProductItems: React.FC = () => {
 
   const discountedPrice = product.price * (1 - product.discountPercentage / 100);
   const ratingStars = Math.round(product.rating);
-  const productId = Number(id);
-  const isInCart = cartProduct.find(product => product.id === productId)?.quantity || 0;
-
-  const handleAddToCart = () => {
-    const updatedProducts = cartProduct.map(product => 
-        product.id === productId ? { ...product, quantity: product.quantity + 1 } : product
-    );
-    setCartProduct(updatedProducts);
-    addToCart(product);
+  
+  const handleAddToCart = (product: CartProduct) => {
+    dispatch(addProductToCart(product));
 };
 
-const handleRemoveFromCart = () => {
-    const updatedProducts = cartProduct.map(product => 
-        product.id === productId ? { ...product, quantity: product.quantity - 1 } : product
-    ).filter(product => product.quantity > 0);
-    setCartProduct(updatedProducts);
-    removeFromCart(productId);
+const handleRemoveFromCart = (productId: number) => {
+    dispatch(removeProductFromCart(productId));
 };
 
   return (
@@ -94,17 +78,17 @@ const handleRemoveFromCart = () => {
             </div>
             <h4 className='product__desc_persent'>Your discount: <span>{product.discountPercentage}%</span></h4>
           </div>
-          {isInCart > 0 ? (
+          {product.quantity > 0 ? (
             <ProductInCart
-              quantity={isInCart}
-              onAdd={handleAddToCart}
-              onRemove={handleRemoveFromCart}
+              quantity={product.quantity}
+              onAdd={() => handleAddToCart(product)}
+              onRemove={() => handleRemoveFromCart(product.id)}
             />
           ) : (
             <Button
               btnName='Add to cart'
               aria-label={`Add ${product.title} to cart`}
-              onClick={handleAddToCart}
+              onClick={() => handleAddToCart(product)}
             />
           )}
         </div>
