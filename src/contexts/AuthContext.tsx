@@ -12,9 +12,8 @@ interface AuthContextProps {
     login: (username: string, password: string) => Promise<void>;
     logout: () => void;
 }
-
 interface AuthProviderProps {
-    children: ReactNode; 
+    children: ReactNode;
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null);

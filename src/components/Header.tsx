@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import cartImage from '../assets/img/cart.png';
 import { useCart } from '../contexts/CartContext';
+import { selectCart } from '../slice/cartSlice';
 import useUser from '../hooks/useUser';
 
 interface HiddenProps {
@@ -11,7 +13,7 @@ interface HiddenProps {
 const Header: React.FC<HiddenProps> = ({ isHidden }) => {
     const location = useLocation();
     const { user, loading: userLoading } = useUser();
-    const cartContext = useCart();
+    const cart = useSelector(selectCart);
 
     useEffect(() => {
         if (location.hash) {
@@ -22,10 +24,13 @@ const Header: React.FC<HiddenProps> = ({ isHidden }) => {
         }
     }, [location]);
 
-    if (userLoading) return <div>Loading user data...</div>;
-    if (!cartContext) return <div>Loading cart...</div>;
+    useEffect(() => {
+        console.log('Cart updated:', cart);
+    }, [cart]);
 
-    const { cart } = cartContext;
+    // if (userLoading || cartStatus === 'loading') return <div>Loading user data...</div>;
+    // if (!cart) return <div>Loading cart...</div>;
+    // if (cartStatus === 'failed') return <div>Error loading cart</div>;
 
     return (
         <header className='container'>

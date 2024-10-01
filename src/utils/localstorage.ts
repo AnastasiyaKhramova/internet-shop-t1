@@ -17,7 +17,7 @@ export const loadCartFromLocalStorage = (): Cart | null => {
     }
 };
 
-export const saveCartToLocalStorage = (cart: Cart | null): void => {
+export const saveCartToLocalStorage = (cart: Cart): void => {
     try {
         const serializedCart = JSON.stringify(cart);
         localStorage.setItem('cart', serializedCart);

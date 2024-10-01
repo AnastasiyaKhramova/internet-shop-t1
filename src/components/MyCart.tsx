@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../store/store';
 import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
-import { updateCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
@@ -15,18 +14,6 @@ const MyCart: React.FC = () => {
 
     const handleAddToCart = (product: CartProduct) => {
         dispatch(addProductToCart(product));
-
-        const token = localStorage.getItem('token') || '';
-
-        const updatedProducts = (cart?.products || []).map(({ id, quantity }) => ({
-            id,
-            quantity
-        }));
-
-        dispatch(updateCart({
-            products: updatedProducts,
-            token
-        }));
     };
 
     const handleRemoveFromCart = (productId: number) => {
@@ -99,6 +86,13 @@ const MyCart: React.FC = () => {
                         <div className="cart__items_costs">
                             <h4 className="cart__items_total">Total count</h4>
                             <p className="cart__items_total-count">{totalProducts} items</p>
+                            <div className="cart-item_btn">
+                                <Button imgSrc={minus} width="50px" height="50px" aria-lable="Remove goods"></Button>
+                                <p>{cartItem.count}</p>
+                                <Button imgSrc={plus} width="50px" height="50px" aria-lable="Add goods"></Button>
+                            </div>
+                            <p className="cart-item_del">{cartItem.delete}</p>
+
                         </div>
                         <div className="cart__items_costs">
                             <h3 className="cart__items_out-discont">Price without discount</h3>
@@ -107,6 +101,23 @@ const MyCart: React.FC = () => {
                         <div className="cart__items_costs">
                             <h2 className="cart__items_total-title">Total price</h2>
                             <p className="cart__items_total-price">${totalPriceWithDiscount.toFixed(2)}</p>
+                            <div className="cart-item_btn cart-item_btn-buy">
+                                <Button imgSrc={cart} width="50px" height="50px" altText="cart" aria-lable={`Add to cart`} onClick={() => handleAddToCart(product)}></Button>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="cart__items_costs">
+                                <h4 className="cart__items_total">Total count</h4>
+                                <p className="cart__items_total-count">{totalProducts} items</p>
+                            </div>
+                            <div className="cart__items_costs">
+                                <h3 className="cart__items_out-discont">Price without discount</h3>
+                                <p className="cart__items_out-discont-price">${totalPriceWithoutDiscount.toFixed(2)}</p>
+                            </div>
+                            <div className="cart__items_costs">
+                                <h2 className="cart__items_total-title">Total price</h2>
+                                <p className="cart__items_total-price">${totalPriceWithDiscount.toFixed(2)}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
