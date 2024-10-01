@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
@@ -28,19 +28,22 @@ const Catalog: React.FC = () => {
     };
 
     const queryParamsString = createQueryParams({ q: searchTerm, limit, skip });
-
     const queryParams = Object.fromEntries(new URLSearchParams(queryParamsString));
-
     const { data, error: queryError, isLoading } = useSearchProductsQuery(queryParams);
-
-    const dispatch = useDispatch();
     const cart = useSelector(selectCart);
 
     useEffect(() => {
-        if (data && data.total) {
+        if (data) {
+            // Сбрасываем `products`, если это первый запрос или если поисковый запрос изменился
+            if (skip === 0) {
+                setProducts(data.products);
+            } else {
+                setProducts(prevProducts => [...prevProducts, ...data.products]);
+            }
             setTotalProducts(data.total);
+            setError(null);
         }
-    }, [data]);
+    }, [data, queryError, skip]);
 
     const getProductQuantityInCart = (productId: number) => {
         const product = cart?.products.find(p => p.id === productId);
@@ -50,37 +53,13 @@ const Catalog: React.FC = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
         setSearchTerm(search);
-        setSkip(0);
-        setProducts([]);
-        if (data && data.products) {
-            const filteredProducts = data.products.filter((product: CartProduct) =>
-                product.title.toLowerCase().includes(search)
-            );
-            setProducts(filteredProducts);
-        }
+        setSkip(0); // Сбрасываем `skip` для нового поиска
     };
 
     const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
 
     const handleShowMore = () => {
         setSkip(prevSkip => prevSkip + limit);
-    };
-
-    useEffect(() => {
-        if (queryError) {
-            setError('Failed to load products. Please try again later.');
-        } else if (data && data.products) {
-            setError(null);
-            setProducts(prevProducts => [...prevProducts, ...data.products]);
-        }
-    }, [data, queryError]);
-
-    const handleAddToCart = (product: CartProduct) => {
-        dispatch(addProductToCart(product));
-    };
-
-    const handleRemoveFromCart = (productId: number) => {
-        dispatch(removeProductFromCart(productId));
     };
 
     return (
@@ -109,8 +88,8 @@ const Catalog: React.FC = () => {
                                     key={product.id}
                                     product={product}
                                     isInCart={isInCart}
-                                    onAdd={() => handleAddToCart(product)}
-                                    onRemove={() => handleRemoveFromCart(product.id)}
+                                    onAdd={() => addProductToCart(product)}
+                                    onRemove={() => removeProductFromCart(product.id)}
                                 />
                             );
                         })}

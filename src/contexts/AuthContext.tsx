@@ -34,7 +34,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     dispatch(fetchCart(user.id));
                     setIsAuthenticated(true);
                 })
-                .catch(() => {
+                .catch(error => {
+                    console.error(error);
                     removeToken();
                     setIsAuthenticated(false);
                 })
@@ -51,11 +52,20 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
+
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+
             const data = await response.json();
-            setToken(data.token);
-            dispatch(setUser(data));
-            dispatch(fetchCart(data.id));
-            setIsAuthenticated(true);
+            if (data.accessToken) {
+                setToken(data.accessToken);
+                dispatch(setUser(data));
+                dispatch(fetchCart(data.id));
+                setIsAuthenticated(true);
+            } else {
+                console.error('Token is missing in the response');
+            }
         } catch (error) {
             console.error('Login error', error);
         }

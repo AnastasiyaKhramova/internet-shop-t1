@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../store/store';
-import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
+import { useSelector } from 'react-redux';
+import { addProductToCart, removeProductFromCart, clearCart, selectCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
 
 const MyCart: React.FC = () => {
-    const dispatch: AppDispatch = useDispatch();
     const cart = useSelector(selectCart);
     const [isLoading] = useState(false);
     const [error] = useState<string | null>(null);
-
-    const handleAddToCart = (product: CartProduct) => {
-        dispatch(addProductToCart(product));
-    };
-
-    const handleRemoveFromCart = (productId: number) => {
-        dispatch(removeProductFromCart(productId));
-    };
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;
@@ -63,11 +53,11 @@ const MyCart: React.FC = () => {
                                         <div className="cart-item_btn">
                                             <ProductInCart
                                                 quantity={product.quantity}
-                                                onAdd={() => handleAddToCart(product)}
-                                                onRemove={() => handleRemoveFromCart(product.id)}
+                                                onAdd={() => addProductToCart(product)}
+                                                onRemove={() => removeProductFromCart(product.id)}
                                             />
                                         </div>
-                                        <button className="cart-item_del" onClick={() => handleRemoveFromCart(product.id)}>Delete</button>
+                                        <button className="cart-item_del" onClick={() => clearCart()}>Delete</button>
                                     </>
                                 ) : (
                                     <Button
@@ -76,7 +66,7 @@ const MyCart: React.FC = () => {
                                         width="50px"
                                         height="50px"
                                         aria-label={`Add ${product.title} to cart`}
-                                        onClick={() => handleAddToCart(product)}
+                                        onClick={() => addProductToCart(product)}
                                     />
                                 )}
                             </div>

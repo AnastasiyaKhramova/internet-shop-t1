@@ -190,13 +190,12 @@ const cartSlice = createSlice({
       }>
     ) => {
       if (state.cartCount) {
-        const productIndex = state.cartCount.products.findIndex(
+        const productIndex = state.cartCount.products.find(
           (p) => p.id === action.payload.id
         );
 
-        if (productIndex > -1) {
-          state.cartCount.products[productIndex].quantity +=
-            action.payload.quantity;
+        if (productIndex) {
+          productIndex.quantity += 1;
         } else {
           state.cartCount.products.push({
             id: action.payload.id,
@@ -223,6 +222,28 @@ const cartSlice = createSlice({
       }
     },
     removeProductFromCart: (state, action: PayloadAction<number>) => {
+      if (state.cartCount) {
+        const productIndex = state.cartCount.products.find(
+          (p) => p.id === action.payload
+        );
+
+        if (productIndex) {
+          productIndex.quantity -= 1;
+
+          state.cartCount.totalProducts = state.cartCount.products.length;
+          state.cartCount.totalQuantity = state.cartCount.products.reduce(
+            (acc, product) => acc + product.quantity,
+            0
+          );
+          state.cartCount.total = state.cartCount.products.reduce(
+            (acc, product) => acc + product.price * product.quantity,
+            0
+          );
+          saveCartToLocalStorage(state.cartCount);
+        }
+      }
+    },
+    deleteAllProductFromCart: (state, action: PayloadAction<number>) => {
       if (state.cartCount) {
         const productIndex = state.cartCount.products.findIndex(
           (p) => p.id === action.payload
@@ -273,7 +294,7 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addProductToCart, removeProductFromCart } = cartSlice.actions;
+export const { addProductToCart, removeProductFromCart, clearCart, deleteAllProductFromCart } = cartSlice.actions;
 
 export const selectCart = (state: RootState) => state.cart.cartCount;
 export const selectCartStatus = (state: RootState) => state.cart.status;
