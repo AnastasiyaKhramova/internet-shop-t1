@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useGetProductQuery } from '../api/productApi';
+import { useGetProductQuery, useGetCartQuery } from '../api/productApi';
+import useCart from '../hooks/useCart';
 import Button from './Button';
 import ProductInCart from './ProductInCart';
 import ErrorPage from '../pages/ErrorPage';
-import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
 
 const ProductItems: React.FC = () => {
-  const dispatch = useDispatch();
-  const cart = useSelector(selectCart);
+  const { addToCart, removeFromCart } = useCart();
+
   const { id } = useParams<{ id: string }>();
   const { data: product, error, isLoading } = useGetProductQuery(id);
   const [mainImage, setMainImage] = useState<string>('');
+  const {data: productCart} = useGetCartQuery(id);
+  const quantityInCart = productCart
+
+  console.log(productCart);
+
 
   useEffect(() => {
     if (product) {
@@ -21,22 +25,12 @@ const ProductItems: React.FC = () => {
     }
   }, [product]);
 
-
-
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading product</div>;
   if (!product) return <ErrorPage />;
 
   const discountedPrice = product.price * (1 - product.discountPercentage / 100);
   const ratingStars = Math.round(product.rating);
-  
-  const handleAddToCart = (product: CartProduct) => {
-    dispatch(addProductToCart(product));
-};
-
-const handleRemoveFromCart = (productId: number) => {
-    dispatch(removeProductFromCart(productId));
-};
 
   return (
     <section className='second-container product'>
@@ -78,17 +72,17 @@ const handleRemoveFromCart = (productId: number) => {
             </div>
             <h4 className='product__desc_persent'>Your discount: <span>{product.discountPercentage}%</span></h4>
           </div>
-          {product.quantity > 0 ? (
+          {quantityInCart > 0 ? (
             <ProductInCart
-              quantity={product.quantity}
-              onAdd={() => handleAddToCart(product)}
-              onRemove={() => handleRemoveFromCart(product.id)}
+              quantity={quantityInCart}
+              onAdd={() => addToCart(product.id)}
+              onRemove={() => removeFromCart(product.id)}
             />
           ) : (
             <Button
               btnName='Add to cart'
               aria-label={`Add ${product.title} to cart`}
-              onClick={() => handleAddToCart(product)}
+              onClick={() => addToCart(product.id)}
             />
           )}
         </div>
@@ -96,5 +90,4 @@ const handleRemoveFromCart = (productId: number) => {
     </section>
   );
 };
-
 export default ProductItems;

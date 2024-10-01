@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'debounce';
 import { useSearchProductsQuery } from '../api/productApi';
-import { useSelector } from 'react-redux';
-import { CartProduct, addProductToCart, removeProductFromCart, selectCart } from '../slice/cartSlice';
+import useCart from '../hooks/useCart';
+import { CartProduct } from '../slice/cartSlice';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 
 const Catalog: React.FC = () => {
+    const { cart, addToCart, removeFromCart } = useCart();
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [skip, setSkip] = useState<number>(0);
     const [products, setProducts] = useState<CartProduct[]>([]);
@@ -30,11 +31,9 @@ const Catalog: React.FC = () => {
     const queryParamsString = createQueryParams({ q: searchTerm, limit, skip });
     const queryParams = Object.fromEntries(new URLSearchParams(queryParamsString));
     const { data, error: queryError, isLoading } = useSearchProductsQuery(queryParams);
-    const cart = useSelector(selectCart);
 
     useEffect(() => {
         if (data) {
-            // Сбрасываем `products`, если это первый запрос или если поисковый запрос изменился
             if (skip === 0) {
                 setProducts(data.products);
             } else {
@@ -53,7 +52,7 @@ const Catalog: React.FC = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const search = e.target.value.toLowerCase();
         setSearchTerm(search);
-        setSkip(0); // Сбрасываем `skip` для нового поиска
+        setSkip(0);
     };
 
     const debouncedHandleSearchChange = useCallback(debounce(handleSearchChange, 1000), []);
@@ -88,8 +87,8 @@ const Catalog: React.FC = () => {
                                     key={product.id}
                                     product={product}
                                     isInCart={isInCart}
-                                    onAdd={() => addProductToCart(product)}
-                                    onRemove={() => removeProductFromCart(product.id)}
+                                    onAdd={() => addToCart(product)}
+                                    onRemove={() => removeFromCart(product.id)}
                                 />
                             );
                         })}
@@ -99,9 +98,7 @@ const Catalog: React.FC = () => {
 
                 {data && products.length < totalProducts && (
                     <div className="button-container">
-
                         <Button btnName='Show more' onClick={handleShowMore} />
-
                     </div>
                 )}
             </div>

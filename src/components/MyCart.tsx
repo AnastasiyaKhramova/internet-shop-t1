@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { addProductToCart, removeProductFromCart, clearCart, selectCart } from '../slice/cartSlice';
 import ProductInCart from './ProductInCart';
+import useCart from '../hooks/useCart';
 import Button from './Button';
 import basket from '../assets/img/cart.png';
 
 const MyCart: React.FC = () => {
-    const cart = useSelector(selectCart);
     const [isLoading] = useState(false);
     const [error] = useState<string | null>(null);
+    const { cart, addToCart, removeFromCart } = useCart();
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;
@@ -53,11 +52,11 @@ const MyCart: React.FC = () => {
                                         <div className="cart-item_btn">
                                             <ProductInCart
                                                 quantity={product.quantity}
-                                                onAdd={() => addProductToCart(product)}
-                                                onRemove={() => removeProductFromCart(product.id)}
+                                                onAdd={() => addToCart(product)}
+                                                onRemove={() => removeFromCart(product.id)}
                                             />
                                         </div>
-                                        <button className="cart-item_del" onClick={() => clearCart()}>Delete</button>
+                                        <button className="cart-item_del" onClick={() => removeFromCart(product.id)}>Delete</button>
                                     </>
                                 ) : (
                                     <Button
@@ -66,7 +65,7 @@ const MyCart: React.FC = () => {
                                         width="50px"
                                         height="50px"
                                         aria-label={`Add ${product.title} to cart`}
-                                        onClick={() => addProductToCart(product)}
+                                        onClick={() => addToCart(product)}
                                     />
                                 )}
                             </div>
@@ -76,13 +75,6 @@ const MyCart: React.FC = () => {
                         <div className="cart__items_costs">
                             <h4 className="cart__items_total">Total count</h4>
                             <p className="cart__items_total-count">{totalProducts} items</p>
-                            <div className="cart-item_btn">
-                                <Button imgSrc={minus} width="50px" height="50px" aria-lable="Remove goods"></Button>
-                                <p>{cartItem.count}</p>
-                                <Button imgSrc={plus} width="50px" height="50px" aria-lable="Add goods"></Button>
-                            </div>
-                            <p className="cart-item_del">{cartItem.delete}</p>
-
                         </div>
                         <div className="cart__items_costs">
                             <h3 className="cart__items_out-discont">Price without discount</h3>
@@ -91,23 +83,6 @@ const MyCart: React.FC = () => {
                         <div className="cart__items_costs">
                             <h2 className="cart__items_total-title">Total price</h2>
                             <p className="cart__items_total-price">${totalPriceWithDiscount.toFixed(2)}</p>
-                            <div className="cart-item_btn cart-item_btn-buy">
-                                <Button imgSrc={cart} width="50px" height="50px" altText="cart" aria-lable={`Add to cart`} onClick={() => handleAddToCart(product)}></Button>
-                            </div>
-                        </div>
-                        <div>
-                            <div className="cart__items_costs">
-                                <h4 className="cart__items_total">Total count</h4>
-                                <p className="cart__items_total-count">{totalProducts} items</p>
-                            </div>
-                            <div className="cart__items_costs">
-                                <h3 className="cart__items_out-discont">Price without discount</h3>
-                                <p className="cart__items_out-discont-price">${totalPriceWithoutDiscount.toFixed(2)}</p>
-                            </div>
-                            <div className="cart__items_costs">
-                                <h2 className="cart__items_total-title">Total price</h2>
-                                <p className="cart__items_total-price">${totalPriceWithDiscount.toFixed(2)}</p>
-                            </div>
                         </div>
                     </div>
                 </div>
