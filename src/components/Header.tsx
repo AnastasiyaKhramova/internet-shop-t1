@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import cartImage from '../assets/img/cart.png';
-import { useCart } from '../contexts/CartContext';
+import  cartStatus  from '../contexts/CartContext';
 import { selectCart } from '../slice/cartSlice';
 import useUser from '../hooks/useUser';
 
