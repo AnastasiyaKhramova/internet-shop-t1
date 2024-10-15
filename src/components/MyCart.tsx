@@ -7,7 +7,7 @@ import basket from '../assets/img/cart.png';
 const MyCart: React.FC = () => {
     const [isLoading] = useState(false);
     const [error] = useState<string | null>(null);
-    const { cart, addToCart, removeFromCart } = useCart();
+    const { cart, addToCart, removeFromCart, removeAllFromCart } = useCart();
 
     let totalProducts = 0;
     let totalPriceWithoutDiscount = 0;
@@ -56,7 +56,7 @@ const MyCart: React.FC = () => {
                                                 onRemove={() => removeFromCart(product.id)}
                                             />
                                         </div>
-                                        <button className="cart-item_del" onClick={() => removeFromCart(product.id)}>Delete</button>
+                                        <button className="cart-item_del" onClick={() => removeAllFromCart(product.id)}>Delete</button>
                                     </>
                                 ) : (
                                     <Button

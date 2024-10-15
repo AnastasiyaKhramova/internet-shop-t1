@@ -1,9 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store/store";
-import {
-  loadCartFromLocalStorage,
-  saveCartToLocalStorage,
-} from "../utils/localstorage";
+import { loadCartFromLocalStorage, saveCartToLocalStorage } from "../utils/localstorage";
 import { fetchCartFromAPI, updateCartInAPI } from "../utils/cart";
 
 export interface CartProduct {
@@ -28,51 +25,49 @@ export interface Cart {
 }
 
 export interface CartState {
-  cartCount: Cart | null;
+  cart: Cart | null;
   cartId: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
 const initialState: CartState = {
-  cartCount: loadCartFromLocalStorage(),
+  cart: loadCartFromLocalStorage() || null,
   cartId: localStorage.getItem("cartId"),
   status: "idle",
   error: null,
 };
 
-export const fetchCart = createAsyncThunk(
-  "cart/fetchCart",
-  async (token: string, thunkAPI) => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      try {
-        const data = await fetchCartFromAPI(userId, token);
-        const cart: Cart = {
-          id: data.id,
-          totalProducts: data.totalProducts,
-          totalQuantity: data.totalQuantity,
-          total: data.total,
-          products: data.products.map((product: CartProduct) => ({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            quantity: product.quantity,
-            discountPercentage: product.discountPercentage,
-            thumbnail: product.thumbnail,
-            discountedTotal: product.discountTotal,
-            total: product.total,
-          })),
-        };
-        saveCartToLocalStorage(cart);
-        return { userId, cart };
-      } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.message);
-      }
+export const fetchCart = createAsyncThunk<{ userId: string; cart: Cart }, string>
+  ("cart/fetchCart", async (token: string, thunkAPI) => {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    try {
+      const data = await fetchCartFromAPI(userId, token);
+      const cart: Cart = {
+        id: data.id,
+        totalProducts: data.totalProducts,
+        totalQuantity: data.totalQuantity,
+        total: data.total,
+        products: data.products.map((product: CartProduct) => ({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          quantity: product.quantity,
+          discountPercentage: product.discountPercentage,
+          thumbnail: product.thumbnail,
+          discountTotal: product.discountTotal,
+          total: product.total,
+        })),
+      };
+      saveCartToLocalStorage(cart);
+      return { userId, cart };
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
     }
-    return thunkAPI.rejectWithValue("No cart ID found");
   }
-);
+  return thunkAPI.rejectWithValue("No cart ID found");
+});
 
 export const createCart = createAsyncThunk(
   "cart/createCart",
@@ -83,7 +78,7 @@ export const createCart = createAsyncThunk(
       }
 
       const state = thunkAPI.getState() as RootState;
-      const cartProducts = state.cart.cartCount?.products ?? [];
+      const cartProducts = state.cart.cart?.products ?? [];
 
       if (cartProducts.length === 0) {
         return thunkAPI.rejectWithValue("Cannot create cart without products");
@@ -154,7 +149,7 @@ export const updateCart = createAsyncThunk(
             quantity: product.quantity,
             discountPercentage: product.discountPercentage,
             thumbnail: product.thumbnail,
-            discountedTotal: product.discountTotal,
+            discountTotal: product.discountTotal,
             total: product.total,
           })),
         };
@@ -168,36 +163,30 @@ export const updateCart = createAsyncThunk(
   }
 );
 
+const calculateTotals = (products: CartProduct[]) => {
+  return {
+    totalProducts: products.length,
+    totalQuantity: products.reduce((acc, product) => acc + product.quantity, 0),
+    total: products.reduce((acc, product) => acc + product.price * product.quantity, 0),
+  };
+};
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     setCart: (state, action: PayloadAction<Cart>) => {
-      state.cartCount = action.payload;
-      saveCartToLocalStorage(state.cartCount);
+      state.cart = action.payload;
+      saveCartToLocalStorage(state.cart);
     },
-    addProductToCart: (
-      state,
-      action: PayloadAction<{
-        id: number;
-        title: string;
-        price: number;
-        discountPercentage: number;
-        thumbnail: string;
-        quantity: number;
-        total: number;
-        discountTotal: number;
-      }>
-    ) => {
-      if (state.cartCount) {
-        const productIndex = state.cartCount.products.find(
-          (p) => p.id === action.payload.id
-        );
+    addProductToCart: (state, action: PayloadAction<CartProduct>) => {
+      if (state.cart) {
+        const productIndex = state.cart.products.findIndex((p) => p.id === action.payload.id);
 
-        if (productIndex) {
-          productIndex.quantity += 1;
+        if (productIndex !== -1) {
+          state.cart.products[productIndex].quantity += 1;
         } else {
-          state.cartCount.products.push({
+          state.cart.products.push({
             id: action.payload.id,
             title: action.payload.title,
             price: action.payload.price,
@@ -208,95 +197,91 @@ const cartSlice = createSlice({
             discountTotal: action.payload.discountTotal,
           });
         }
-
-        state.cartCount.totalProducts = state.cartCount.products.length;
-        state.cartCount.totalQuantity = state.cartCount.products.reduce(
-          (acc, product) => acc + product.quantity,
-          0
-        );
-        state.cartCount.total = state.cartCount.products.reduce(
-          (acc, product) => acc + product.price * product.quantity,
-          0
-        );
-        saveCartToLocalStorage(state.cartCount);
+        const totals = calculateTotals(state.cart.products);
+        state.cart.totalProducts = totals.totalProducts;
+        state.cart.totalQuantity = totals.totalQuantity;
+        state.cart.total = totals.total;
+        saveCartToLocalStorage(state.cart);
       }
     },
     removeProductFromCart: (state, action: PayloadAction<number>) => {
-      if (state.cartCount) {
-        const productIndex = state.cartCount.products.find(
-          (p) => p.id === action.payload
-        );
+      if (state.cart) {
+        const productIndex = state.cart.products.findIndex((p) => p.id === action.payload);
 
-        if (productIndex) {
-          productIndex.quantity -= 1;
+        if (productIndex !== -1) {
+          state.cart.products[productIndex].quantity -= 1;
+          if (state.cart.products[productIndex].quantity <= 0) { state.cart.products.splice(productIndex, 1); }
 
-          state.cartCount.totalProducts = state.cartCount.products.length;
-          state.cartCount.totalQuantity = state.cartCount.products.reduce(
-            (acc, product) => acc + product.quantity,
-            0
-          );
-          state.cartCount.total = state.cartCount.products.reduce(
-            (acc, product) => acc + product.price * product.quantity,
-            0
-          );
-          saveCartToLocalStorage(state.cartCount);
+          const totals = calculateTotals(state.cart.products);
+          state.cart.totalProducts = totals.totalProducts;
+          state.cart.totalQuantity = totals.totalQuantity;
+          state.cart.total = totals.total;
+          console.log(state.cart)
+          saveCartToLocalStorage(state.cart);
         }
       }
     },
-    deleteAllProductFromCart: (state, action: PayloadAction<number>) => {
-      if (state.cartCount) {
-        const productIndex = state.cartCount.products.findIndex(
-          (p) => p.id === action.payload
-        );
-
-        if (productIndex > -1) {
-          state.cartCount.products.splice(productIndex, 1);
-
-          state.cartCount.totalProducts = state.cartCount.products.length;
-          state.cartCount.totalQuantity = state.cartCount.products.reduce(
-            (acc, product) => acc + product.quantity,
-            0
-          );
-          state.cartCount.total = state.cartCount.products.reduce(
-            (acc, product) => acc + product.price * product.quantity,
-            0
-          );
-          saveCartToLocalStorage(state.cartCount);
+    removeAllQuantityFromProduct: (state, action: PayloadAction<number>) => {
+      if (state.cart) {
+        const productIndex = state.cart.products.findIndex((p) => p.id === action.payload);
+    
+        if (productIndex !== -1) {
+          state.cart.products[productIndex].quantity = 0;
+    
+          const totals = calculateTotals(state.cart.products);
+          state.cart.totalProducts = totals.totalProducts;
+          state.cart.totalQuantity = totals.totalQuantity;
+          state.cart.total = totals.total;
+    
+          saveCartToLocalStorage(state.cart);
         }
       }
-    },
-    clearCart: (state) => {
-      state.cartCount = null;
-      localStorage.removeItem("cartId");
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCart.fulfilled, (state, action) => {
-        state.cartCount = action.payload.cart;
-        state.cartId = action.payload.userId;
-        state.status = "succeeded";
-        saveCartToLocalStorage(state.cartCount);
-      })
-      .addCase(updateCart.fulfilled, (state, action) => {
-        state.cartCount = action.payload;
-        state.status = "succeeded";
-        saveCartToLocalStorage(state.cartCount);
-      })
-      .addCase(fetchCart.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.status = "failed";
-      })
-      .addCase(updateCart.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.status = "failed";
-      });
+    .addCase(fetchCart.fulfilled, (state, action) => {
+      state.cart = action.payload.cart;
+      state.cartId = action.payload.userId;
+      state.status = "succeeded";
+      saveCartToLocalStorage(state.cart);
+    })
+    .addCase(fetchCart.pending, (state) => {
+      state.status = "loading";
+    })
+    .addCase(fetchCart.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    })
+    .addCase(createCart.fulfilled, (state, action) => {
+      state.cartId = action.payload.cartId;
+      state.status = "succeeded";
+    })
+    .addCase(createCart.pending, (state) => {
+      state.status = "loading";
+    })
+    .addCase(createCart.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    })
+    .addCase(updateCart.fulfilled, (state, action) => {
+      state.cart = action.payload;
+      state.status = "succeeded";
+      saveCartToLocalStorage(state.cart);
+    })
+    .addCase(updateCart.pending, (state) => {
+      state.status = "loading";
+    })
+    .addCase(updateCart.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
   },
 });
 
-export const { addProductToCart, removeProductFromCart, clearCart, deleteAllProductFromCart } = cartSlice.actions;
+export const { setCart, addProductToCart, removeProductFromCart, removeAllQuantityFromProduct} = cartSlice.actions;
 
-export const selectCart = (state: RootState) => state.cart.cartCount;
+export const selectCart = (state: RootState) => state.cart.cart;
 export const selectCartStatus = (state: RootState) => state.cart.status;
 export const selectCartError = (state: RootState) => state.cart.error;
 

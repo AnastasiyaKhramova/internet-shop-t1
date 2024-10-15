@@ -9,9 +9,7 @@ function Home() {
   useEffect(() => {
     document.title = 'Catalog | Goods4you';
   }, []);
-  useEffect(() => {
-      document.title = 'My cart | Goods4you';
-  }, []);
+
   return (
     <>
       <Header />

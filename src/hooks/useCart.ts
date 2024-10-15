@@ -1,29 +1,44 @@
 import { useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCart, addProductToCart, removeProductFromCart, selectCart, createCart, CartProduct } from '../slice/cartSlice';
+import {
+  fetchCart,
+  addProductToCart,
+  removeProductFromCart,
+  removeAllQuantityFromProduct,
+  selectCart,
+  createCart,
+  CartProduct,
+  setCart,
+} from '../slice/cartSlice';
 import { AppDispatch } from '../store/store';
+import { loadCartFromLocalStorage } from '../utils/localstorage';
 
 const useCart = () => {
   const dispatch = useDispatch<AppDispatch>();
   const cart = useSelector(selectCart);
   const token = localStorage.getItem('token');
+  const userId = Number(localStorage.getItem('userId'));
   const cartId = localStorage.getItem('cartId');
-  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
+    const cartFromStorage = loadCartFromLocalStorage();
+    console.log(cartFromStorage)
+    if (cartFromStorage) {
+      dispatch(setCart(cartFromStorage));
+    }
     if (token) {
       if (cartId) {
-        dispatch(fetchCart(token));
+        if (!cartFromStorage || cartFromStorage.products.length === 0 && userId === cartFromStorage.id) {
+          dispatch(fetchCart(token));
+        }
       } else if (userId) {
         dispatch(createCart({ userId: Number(userId), token }));
-      } else {
-        console.error("User ID is missing. Cannot create cart.");
       }
     }
   }, [dispatch, cartId, token, userId]);
 
   const addToCart = useCallback((product: CartProduct) => {
-    if (cart && token) {
+    if (cart) {
       dispatch(addProductToCart({
         id: product.id,
         title: product.title,
@@ -35,18 +50,26 @@ const useCart = () => {
         discountTotal: (product.price * 1) * (product.discountPercentage / 100),
       }));
     }
-  }, [dispatch, cart, token]);
+  }, [dispatch, cart]);
 
   const removeFromCart = useCallback((productId: number) => {
-    if (cart && token) {
+    if (cart) {
       dispatch(removeProductFromCart(productId));
     }
-  }, [dispatch, cart, token]);
+  }, [dispatch, cart]);
+
+  const removeAllFromCart = useCallback ((productId: number) => {
+    if (cart) {
+      dispatch(removeAllQuantityFromProduct(productId));
+    }
+  }, [dispatch, cart]);
+ 
 
   return {
     cart,
     addToCart,
     removeFromCart,
+    removeAllFromCart
   };
 };
 

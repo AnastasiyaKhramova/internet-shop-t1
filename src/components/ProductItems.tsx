@@ -8,8 +8,7 @@ import ErrorPage from "../pages/ErrorPage";
 import { CartProduct } from "../slice/cartSlice";
 
 const ProductItems: React.FC = () => {
-  const cart = useCart();
-  const { addToCart, removeFromCart } = useCart();
+  const { cart, addToCart, removeFromCart } = useCart();
   const { id } = useParams<{ id: string }>();
   const { data: product, error, isLoading } = useGetProductQuery(id);
   const [mainImage, setMainImage] = useState<string>("");
@@ -25,7 +24,7 @@ const ProductItems: React.FC = () => {
   if (error) return <div>Error loading product</div>;
   if (!product) return <ErrorPage />;
 
-  const productInCart = cart?.cart?.products?.find((p: CartProduct) => p.id === product.id);
+  const productInCart = cart?.products?.find((p: CartProduct) => p.id === product.id);
   const quantityInCart = productInCart ? productInCart.quantity : 0;
   const discountedPrice = product.discountPercentage
     ? product.price * (1 - product.discountPercentage / 100)
